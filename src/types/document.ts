@@ -24,6 +24,7 @@ export type Document = {
   uploadedAt?: string;
   certificateId?: string;
   processing_status?: string;
+  extension?: string; // File extension (e.g., ".pdf", ".docx")
   documents_tags?: {
     rationale: string;
     confidence: number;

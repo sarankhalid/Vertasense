@@ -7,7 +7,8 @@ import { supabaseBrowserClient } from "@/utils/supabase/client";
 import {
   getDocumentTypeFromMime,
   generateDocumentId,
-  removeFileExtension
+  removeFileExtension,
+  getFileExtension
 } from "@/components/documents/document-type-utils";
 
 interface DocumentStats {
@@ -181,6 +182,7 @@ export const useDocumentStore = create<DocumentState>()(
             uploadedAt: item.created_at || new Date().toISOString(),
             certificateId: item.client_certificate_id,
             processing_status: item.processing_status || "processing",
+            extension: item.extension || (item.name ? getFileExtension(item.name) : ""),
             documents_tags: documentsTags,
             mapped_clauses: mappedClauses,
           };
@@ -254,6 +256,7 @@ export const useDocumentStore = create<DocumentState>()(
             path: fileUrl,
             client_certificate_id: certificateId,
             processing_status: "processing", // Initial status
+            extension: getFileExtension(fileName), // Add file extension
           };
 
           const { data: documentRecord, error: documentError } = await supabaseBrowserClient
@@ -286,6 +289,7 @@ export const useDocumentStore = create<DocumentState>()(
             uploadedAt: new Date().toISOString(),
             certificateId: certificateId,
             processing_status: "processing",
+            extension: getFileExtension(fileName), // Add file extension
           };
 
           // Update the documents list with the new document
@@ -479,6 +483,7 @@ export const useDocumentStore = create<DocumentState>()(
             uploadedAt: new Date().toISOString(),
             certificateId: file.certificateId,
             processing_status: "processing",
+            extension: getFileExtension(file.file.name), // Add file extension
           } as Document;
         });
 

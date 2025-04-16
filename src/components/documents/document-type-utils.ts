@@ -82,3 +82,14 @@ export function removeFileExtension(fileName: string): string {
   if (lastDotIndex === -1) return fileName;
   return fileName.substring(0, lastDotIndex);
 }
+
+/**
+ * Extracts the file extension from a filename
+ * @param fileName The full filename with extension
+ * @returns The file extension with the dot (e.g., ".pdf", ".docx")
+ */
+export function getFileExtension(fileName: string): string {
+  const lastDotIndex = fileName.lastIndexOf('.');
+  if (lastDotIndex === -1) return "";
+  return fileName.substring(lastDotIndex).toLowerCase();
+}
