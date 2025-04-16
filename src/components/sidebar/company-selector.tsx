@@ -127,8 +127,8 @@ export function CompanySelector({ className }: CompanySelectorProps) {
 
           // Extract and format the companies
           const formattedCompanies = userCompanies
-            .filter((item) => item.organizations)
-            .map((item) => ({
+            .filter((item: any) => item.organizations)
+            .map((item: any) => ({
               id: item.organizations.id,
               name: item.organizations.name,
               type: item.organizations.type,
