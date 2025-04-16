@@ -400,7 +400,7 @@ export async function updateSession(request: NextRequest) {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError) {
-      console.error("Error fetching authenticated user:", userError);
+      // console.error("Error fetching authenticated user:", userError);
       // Clear any invalid auth cookies and redirect to login for protected routes
       if (isProtectedRoute(pathname)) {
         return redirectToLogin(request);
