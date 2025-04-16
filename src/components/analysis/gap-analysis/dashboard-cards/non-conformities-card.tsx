@@ -1,9 +1,9 @@
 import { AlertCircle, Info, XCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { NonConformityStats } from "@/types/analysis-types"
+// import type { NonConformityStats } from "@/types/analysis-types"
 
 interface NonConformitiesCardProps {
-  stats: NonConformityStats
+  stats: any
 }
 
 export function NonConformitiesCard({ stats }: NonConformitiesCardProps) {

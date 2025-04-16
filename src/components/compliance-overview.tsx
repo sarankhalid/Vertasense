@@ -489,7 +489,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { AddCertificateDialog } from "./add-certificate-dialog";
+// import { AddCertificateDialog } from "./add-certificate-dialog";
 import { CertificateCard } from "./certificate-card";
 import { AddCertificateCard } from "./add-certificate-card";
 import type { Certification } from "@/types/certification";
@@ -756,10 +756,10 @@ export function ComplianceOverview() {
       </div>
 
       {/* Add Certificate Dialog */}
-      <AddCertificateDialog
+      {/* <AddCertificateDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-      />
+      /> */}
     </div>
   );
 }

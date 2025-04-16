@@ -20,8 +20,8 @@ interface CompanyState {
 
   // API methods
   fetchCompanies: (organizationId: string) => Promise<void>;
-  // createCompany: (companyData: Omit<Company, "id" | "created_at" | "updated_at">) => Promise<{ data: Company | null; error: string | null }>;
-  createCompany: (companyData: Omit<Company, "id" | "created_at" | "updated_at">) => void;
+  createCompany: (companyData: Omit<Company, "id" | "created_at" | "updated_at">) => Promise<{ data: Company | null; error: string | null }>;
+  // createCompany: (companyData: Omit<Company, "id" | "created_at" | "updated_at">) => void;
   updateCompany: (id: string, companyData: Partial<Omit<Company, "id" | "created_at" | "updated_at">>) => Promise<{ data: Company | null; error: string | null }>;
   deleteCompany: (id: string) => Promise<{ success: boolean; error: string | null }>;
 

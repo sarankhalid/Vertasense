@@ -1,36 +1,42 @@
-import { FileText } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import type { Clause, GapStatus, NonConformityType } from "@/types/analysis-types"
+import { FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+// import type { Clause, GapStatus, NonConformityType } from "@/types/analysis-types"
 
 interface ClauseDetailProps {
-  clause: Clause
+  clause: any;
 }
 
 export function ClauseDetail({ clause }: ClauseDetailProps) {
   // Get status badge for a gap
-  const getGapStatusBadge = (status: GapStatus) => {
+  const getGapStatusBadge = (status: any) => {
     switch (status) {
       case "closed":
-        return <Badge className="bg-green-500 hover:bg-green-600">Closed</Badge>
+        return (
+          <Badge className="bg-green-500 hover:bg-green-600">Closed</Badge>
+        );
       case "in-progress":
-        return <Badge className="bg-amber-500 hover:bg-amber-600">In Progress</Badge>
+        return (
+          <Badge className="bg-amber-500 hover:bg-amber-600">In Progress</Badge>
+        );
       case "open":
-        return <Badge className="bg-red-500 hover:bg-red-600">Open</Badge>
+        return <Badge className="bg-red-500 hover:bg-red-600">Open</Badge>;
     }
-  }
+  };
 
   // Get non-conformity type badge
-  const getNonConformityTypeBadge = (type: NonConformityType) => {
+  const getNonConformityTypeBadge = (type: any) => {
     switch (type) {
       case "major":
-        return <Badge className="bg-red-500 hover:bg-red-600">Major</Badge>
+        return <Badge className="bg-red-500 hover:bg-red-600">Major</Badge>;
       case "minor":
-        return <Badge className="bg-amber-500 hover:bg-amber-600">Minor</Badge>
+        return <Badge className="bg-amber-500 hover:bg-amber-600">Minor</Badge>;
       case "observation":
-        return <Badge className="bg-blue-500 hover:bg-blue-600">Observation</Badge>
+        return (
+          <Badge className="bg-blue-500 hover:bg-blue-600">Observation</Badge>
+        );
     }
-  }
+  };
 
   return (
     <div className="pl-8 pr-4 pb-4 space-y-4">
@@ -50,7 +56,7 @@ export function ClauseDetail({ clause }: ClauseDetailProps) {
         <div>
           <h4 className="text-sm font-medium mb-1">Evidence Files</h4>
           <div className="space-y-1">
-            {clause.evidence.map((evidence, index) => (
+            {clause.evidence.map((evidence: any, index: any) => (
               <div key={index} className="flex items-center gap-2 text-sm">
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 <span>{evidence}</span>
@@ -61,15 +67,19 @@ export function ClauseDetail({ clause }: ClauseDetailProps) {
       ) : (
         <div>
           <h4 className="text-sm font-medium mb-1">Evidence Files</h4>
-          <p className="text-sm text-muted-foreground">No evidence files provided</p>
+          <p className="text-sm text-muted-foreground">
+            No evidence files provided
+          </p>
         </div>
       )}
 
-      {clause.nonConformities && clause.nonConformities.items && clause.nonConformities.items.length > 0 ? (
+      {clause.nonConformities &&
+      clause.nonConformities.items &&
+      clause.nonConformities.items.length > 0 ? (
         <div>
           <h4 className="text-sm font-medium mb-2">Non-Conformities</h4>
           <div className="space-y-3">
-            {clause.nonConformities.items.map((nc, index) => (
+            {clause.nonConformities.items.map((nc: any, index: any) => (
               <div key={index} className="bg-muted/50 p-3 rounded-md">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -78,30 +88,44 @@ export function ClauseDetail({ clause }: ClauseDetailProps) {
                       : getNonConformityTypeBadge("minor")}
                     <span className="font-medium">{nc.nature}</span>
                   </div>
-                  {clause.gapClosureStatus && getGapStatusBadge(clause.gapClosureStatus)}
+                  {clause.gapClosureStatus &&
+                    getGapStatusBadge(clause.gapClosureStatus)}
                 </div>
 
                 {clause.nonConformities.rootCause &&
-                  clause.nonConformities.rootCause !== "[Root cause analysis]" &&
+                  clause.nonConformities.rootCause !==
+                    "[Root cause analysis]" &&
                   clause.nonConformities.rootCause !== "[No data]" && (
                     <div className="mb-2">
-                      <h5 className="text-xs font-medium text-muted-foreground mb-1">Root Cause</h5>
-                      <p className="text-sm">{clause.nonConformities.rootCause}</p>
+                      <h5 className="text-xs font-medium text-muted-foreground mb-1">
+                        Root Cause
+                      </h5>
+                      <p className="text-sm">
+                        {clause.nonConformities.rootCause}
+                      </p>
                     </div>
                   )}
 
                 {clause.nonConformities.correctiveActionRecommendations &&
-                  clause.nonConformities.correctiveActionRecommendations !== "[Corrective actions]" &&
-                  clause.nonConformities.correctiveActionRecommendations !== "[No data]" && (
+                  clause.nonConformities.correctiveActionRecommendations !==
+                    "[Corrective actions]" &&
+                  clause.nonConformities.correctiveActionRecommendations !==
+                    "[No data]" && (
                     <div className="mb-2">
-                      <h5 className="text-xs font-medium text-muted-foreground mb-1">Corrective Action</h5>
-                      <p className="text-sm">{clause.nonConformities.correctiveActionRecommendations}</p>
+                      <h5 className="text-xs font-medium text-muted-foreground mb-1">
+                        Corrective Action
+                      </h5>
+                      <p className="text-sm">
+                        {clause.nonConformities.correctiveActionRecommendations}
+                      </p>
                     </div>
                   )}
 
                 {clause.nonConformities.timelineForCorrection &&
-                  clause.nonConformities.timelineForCorrection !== "[Suggested timeline for corrective action]" &&
-                  clause.nonConformities.timelineForCorrection !== "[No data]" && (
+                  clause.nonConformities.timelineForCorrection !==
+                    "[Suggested timeline for corrective action]" &&
+                  clause.nonConformities.timelineForCorrection !==
+                    "[No data]" && (
                     <div className="text-xs text-muted-foreground">
                       Due date: {clause.nonConformities.timelineForCorrection}
                     </div>
@@ -113,7 +137,9 @@ export function ClauseDetail({ clause }: ClauseDetailProps) {
       ) : (
         <div>
           <h4 className="text-sm font-medium mb-1">Non-Conformities</h4>
-          <p className="text-sm text-muted-foreground">No non-conformities identified</p>
+          <p className="text-sm text-muted-foreground">
+            No non-conformities identified
+          </p>
         </div>
       )}
 
@@ -123,5 +149,5 @@ export function ClauseDetail({ clause }: ClauseDetailProps) {
         </Button>
       </div>
     </div>
-  )
+  );
 }

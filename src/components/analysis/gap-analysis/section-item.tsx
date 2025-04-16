@@ -3,11 +3,11 @@ import { ChevronDown, ChevronRight } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import type { ClauseSection } from "@/types/analysis-types"
+// import type { ClauseSection } from "@/types/analysis-types"
 import { ClauseItem } from "./clause-item"
 
 interface SectionItemProps {
-  section: ClauseSection
+  section: any
   expandedClauses: Record<string, boolean>
   isExpanded: boolean
   onToggleSection: () => void
@@ -48,20 +48,20 @@ export function SectionItem({
               <Progress
                 value={section.implementationPercentage}
                 className="w-24 h-2"
-                indicatorClassName={cn(
-                  section.implementationPercentage >= 70
-                    ? "bg-green-500"
-                    : section.implementationPercentage >= 30
-                      ? "bg-amber-500"
-                      : "bg-red-500",
-                )}
+                // indicatorClassName={cn(
+                //   section.implementationPercentage >= 70
+                //     ? "bg-green-500"
+                //     : section.implementationPercentage >= 30
+                //       ? "bg-amber-500"
+                //       : "bg-red-500",
+                // )}
               />
             </div>
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="border-t px-4 py-2 divide-y">
-            {section.clauses.map((clause) => (
+            {section.clauses.map((clause: any) => (
               <ClauseItem
                 key={clause.id}
                 clause={clause}

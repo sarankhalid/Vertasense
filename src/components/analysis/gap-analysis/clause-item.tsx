@@ -3,18 +3,18 @@ import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import type { Clause, ClauseStatus } from "@/types/analysis-types"
+// import type { Clause, ClauseStatus } from "@/types/analysis-types"
 import { ClauseDetail } from "./clause-detail"
 
 interface ClauseItemProps {
-  clause: Clause
+  clause: any
   isExpanded: boolean
   onToggle: () => void
 }
 
 export function ClauseItem({ clause, isExpanded, onToggle }: ClauseItemProps) {
   // Get status badge for a clause
-  const getStatusBadge = (status: ClauseStatus) => {
+  const getStatusBadge = (status: any) => {
     switch (status) {
       case "compliant":
         return <Badge className="bg-green-500 hover:bg-green-600">Compliant</Badge>
@@ -60,13 +60,13 @@ export function ClauseItem({ clause, isExpanded, onToggle }: ClauseItemProps) {
             <Progress
               value={clause.implementationPercentage}
               className="w-24 h-2"
-              indicatorClassName={cn(
-                clause.implementationPercentage >= 70
-                  ? "bg-green-500"
-                  : clause.implementationPercentage >= 30
-                    ? "bg-amber-500"
-                    : "bg-red-500",
-              )}
+              // indicatorClassName={cn(
+              //   clause.implementationPercentage >= 70
+              //     ? "bg-green-500"
+              //     : clause.implementationPercentage >= 30
+              //       ? "bg-amber-500"
+              //       : "bg-red-500",
+              // )}
             />
           </div>
         </div>

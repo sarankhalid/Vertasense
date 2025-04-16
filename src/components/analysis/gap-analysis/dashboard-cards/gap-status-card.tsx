@@ -1,9 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import type { NonConformityStats } from "@/types/analysis-types"
+// import type { NonConformityStats } from "@/types/analysis-types"
 
 interface GapStatusCardProps {
-  stats: NonConformityStats
+  stats: any
 }
 
 export function GapStatusCard({ stats }: GapStatusCardProps) {
@@ -23,7 +23,7 @@ export function GapStatusCard({ stats }: GapStatusCardProps) {
             <Progress
               value={stats.total > 0 ? (stats.open / stats.total) * 100 : 0}
               className="h-2 bg-muted"
-              indicatorClassName="bg-red-500"
+              // indicatorClassName="bg-red-500"
             />
           </div>
           <div>
@@ -34,7 +34,7 @@ export function GapStatusCard({ stats }: GapStatusCardProps) {
             <Progress
               value={stats.total > 0 ? (stats.inProgress / stats.total) * 100 : 0}
               className="h-2 bg-muted"
-              indicatorClassName="bg-amber-500"
+              // indicatorClassName="bg-amber-500"
             />
           </div>
           <div>
@@ -45,7 +45,7 @@ export function GapStatusCard({ stats }: GapStatusCardProps) {
             <Progress
               value={stats.total > 0 ? (stats.closed / stats.total) * 100 : 0}
               className="h-2 bg-muted"
-              indicatorClassName="bg-green-500"
+              // indicatorClassName="bg-green-500"
             />
           </div>
         </div>

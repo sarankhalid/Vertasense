@@ -1086,7 +1086,7 @@ export function GapAnalysis() {
         </div>
         <h3 className="text-xl font-semibold mb-2">Loading Gap Analysis</h3>
         <p className="text-muted-foreground">
-          Retrieving data for {selectedCertificate.name}...
+          Retrieving data for {selectedCertificate.certifications.name}...
         </p>
       </div>
     );

@@ -235,6 +235,36 @@ export default function ConsultantManagement() {
     }
   };
 
+  // const handleAssignCompany = async (
+  //   consultantId: string,
+  //   companyId: string,
+  //   certificateIds: string[]
+  // ) => {
+  //   const result = await assignCompanyandCertificationsToConsultant(
+  //     consultantId,
+  //     companyId,
+  //     certificateIds
+  //   );
+  //   if (result.success) {
+  //     // Update local state after the assignment
+  //     const updatedConsultant = consultantsUI.map((consultant) => {
+  //       if (consultant.id === consultantId) {
+  //         return {
+  //           ...consultant,
+  //           companies: [
+  //             ...consultant.companies,
+  //             { id: companyId, certificates: certificateIds },
+  //           ],
+  //         };
+  //       }
+  //       return consultant;
+  //     });
+  //     setConsultantsUI(updatedConsultant);
+  //   } else {
+  //     console.error(result.error);
+  //   }
+  // };
+
   const handleAssignCompany = async (
     consultantId: string,
     companyId: string,
@@ -246,6 +276,11 @@ export default function ConsultantManagement() {
       certificateIds
     );
     if (result.success) {
+      // Find the company name from the companies list
+      const companyName =
+        companies.find((company) => company.id === companyId)?.name ||
+        "Unknown Company";
+
       // Update local state after the assignment
       const updatedConsultant = consultantsUI.map((consultant) => {
         if (consultant.id === consultantId) {
@@ -253,7 +288,11 @@ export default function ConsultantManagement() {
             ...consultant,
             companies: [
               ...consultant.companies,
-              { id: companyId, certificates: certificateIds },
+              {
+                id: companyId,
+                name: companyName,
+                certificates: certificateIds,
+              },
             ],
           };
         }
@@ -401,7 +440,6 @@ export default function ConsultantManagement() {
 
         {/* Consultant Details */}
         <div className="lg:col-span-1">
-
           {selectedConsultantUI ? (
             <ConsultantDetails
               consultant={selectedConsultantUI}
