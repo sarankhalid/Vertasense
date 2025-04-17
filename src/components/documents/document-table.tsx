@@ -790,9 +790,9 @@ export function DocumentTable({ documents, selectedDocument, onSelectDocument, o
                         // If it's an object with numeric keys, convert to array and map
                         Object.keys(doc.documents_tags.document_types)
                           .filter((key) => !isNaN(Number(key)) && key !== "length")
-                          .map((key) => (
+                          .map((key: any) => (
                             <Badge key={key} className="bg-blue-100 text-blue-800 text-xs">
-                              {doc.documents_tags.document_types[key]}
+                              {doc?.documents_tags?.document_types[key]}
                             </Badge>
                           ))
                       ) : (
