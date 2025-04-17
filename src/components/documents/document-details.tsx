@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { toast } from "sonner";
 
 interface DocumentDetailsProps {
@@ -33,7 +33,8 @@ interface DocumentDetailsProps {
   ) => Promise<{ success: boolean; error: string | null }>;
 }
 
-export function DocumentDetails({
+// Using memo to prevent unnecessary re-renders when other parts of the UI change
+export const DocumentDetails = memo(function DocumentDetails({
   document,
   onViewDocument,
   onDeleteDocument,
@@ -163,27 +164,6 @@ export function DocumentDetails({
           </div>
         </div>
 
-        {/* {document.processing_status === "classification_completed" && document.documents_tags && (
-          <div>
-            <h3 className="text-sm text-muted-foreground mb-1">
-              Document Classification
-            </h3>
-            <div className="bg-blue-50 p-3 rounded-md text-sm">
-              <div className="mb-2">
-                <span className="font-semibold">Document Types: </span>
-                {document.documents_tags.document_types.join(", ")}
-              </div>
-              <div className="mb-2">
-                <span className="font-semibold">Confidence: </span>
-                {(document.documents_tags.confidence * 100).toFixed(0)}%
-              </div>
-              <div>
-                <span className="font-semibold">Rationale: </span>
-                {document.documents_tags.rationale}
-              </div>
-            </div>
-          </div>
-        )} */}
         {document.processing_status === "classification_completed" &&
           document.documents_tags && (
             <div>
@@ -345,4 +325,4 @@ export function DocumentDetails({
       </CardContent>
     </Card>
   );
-}
+});

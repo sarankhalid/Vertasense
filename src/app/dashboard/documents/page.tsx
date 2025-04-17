@@ -1,7 +1,7 @@
-"use client";
+        "use client";
 
-import { useEffect, useState } from "react";
-import { FileText, AlertCircle } from "lucide-react";
+import { useEffect } from "react";
+import { FileText } from "lucide-react";
 import {
   DocumentHeader,
   DocumentStatistics,
@@ -34,12 +34,16 @@ export default function Documents() {
     setSearchTerm,
     setSelectedDocument,
     setIsUploadDialogOpen,
-    handleUploadComplete,
+    // handleUploadComplete,
     handleViewDocument,
-    handleAiClassification,
+    // handleAiClassification,
     getFilteredDocuments,
     getDocumentStats,
     deleteDocument,
+    processDocumentData,
+    addDocument,
+    updateDocument,
+    removeDocument,
   } = useDocumentStore();
 
   // Set up real-time subscription for documents
@@ -59,14 +63,77 @@ export default function Documents() {
           .on(
             "postgres_changes",
             {
-              event: "*",
+              event: "INSERT",
               schema: "public",
               table: "user_documents",
               filter: `client_certificate_id=eq.${selectedCertificate.id}`,
             },
             async (payload) => {
               console.log("Document inserted:", payload);
-              await fetchDocuments(selectedCertificate.id);
+              // Fetch the document data directly
+              const { data, error } = await supabaseBrowserClient
+                .from("user_documents")
+                .select("*")
+                .eq("id", payload.new.id)
+                .single();
+              
+              if (error) {
+                console.error("Error fetching inserted document:", error);
+                return;
+              }
+              
+              // Process the new document and add it to the store
+              if (data) {
+                const newDoc = processDocumentData(data);
+                // Check if document already exists
+                const docExists = documents.some((doc) => doc.id === newDoc.id);
+      
+                if (!docExists) {
+                  addDocument(newDoc);
+                }
+              }
+            }
+          )
+          .on(
+            "postgres_changes",
+            {
+              event: "UPDATE",
+              schema: "public",
+              table: "user_documents",
+              filter: `client_certificate_id=eq.${selectedCertificate.id}`,
+            },
+            async (payload) => {
+              console.log("Document updated:", payload);
+              // Process the updated document and update it in the store
+              const { data, error } = await supabaseBrowserClient
+                .from("user_documents")
+                .select("*")
+                .eq("id", payload.new.id)
+                .single();
+              
+              if (error) {
+                console.error("Error fetching updated document:", error);
+                return;
+              }
+              
+              if (data) {
+                const updatedDoc = processDocumentData(data);
+                updateDocument(updatedDoc);
+              }
+            }
+          )
+          .on(
+            "postgres_changes",
+            {
+              event: "DELETE",
+              schema: "public",
+              table: "user_documents",
+              filter: `client_certificate_id=eq.${selectedCertificate.id}`,
+            },
+            (payload) => {
+              console.log("Document deleted:", payload);
+              // Remove the document from the store
+              removeDocument(payload.old.id);
             }
           )
           .subscribe((status) => {
@@ -135,10 +202,10 @@ export default function Documents() {
         onAddDocument={() => setIsUploadDialogOpen(true)}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        onAiClassification={() =>
-          selectedCertificate?.id &&
-          handleAiClassification(selectedCertificate.id)
-        }
+        // onAiClassification={() =>
+        //   selectedCertificate?.id &&
+        //   handleAiClassification(selectedCertificate.id)
+        // }
         isClassifying={isClassifying}
       />
 
@@ -163,7 +230,7 @@ export default function Documents() {
       <UploadDocumentDialog
         open={isUploadDialogOpen}
         onOpenChange={setIsUploadDialogOpen}
-        onUploadComplete={handleUploadComplete}
+        // onUploadComplete={handleUploadComplete}
       />
     </div>
   );

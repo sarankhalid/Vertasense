@@ -1,3 +1,4 @@
+// Base components
 export { DocumentHeader } from "./document-header";
 export { DocumentStatistics } from "./document-statistics";
 export { DocumentTable } from "./document-table";

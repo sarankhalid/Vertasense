@@ -38,11 +38,11 @@ interface FileWithStatus {
 export function UploadDocumentDialog({
   open,
   onOpenChange,
-  onUploadComplete,
+  // onUploadComplete,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUploadComplete?: (files: FileWithStatus[]) => void;
+  // onUploadComplete?: (files: FileWithStatus[]) => void;
 }) {
   const { selectedCertificate } = useCertificateStore();
   const { uploadDocument } = useDocumentStore();
@@ -142,9 +142,9 @@ export function UploadDocumentDialog({
     const completedFiles = selectedFiles.filter(
       (file) => file.status === "completed"
     );
-    if (completedFiles.length > 0 && onUploadComplete) {
-      onUploadComplete(completedFiles);
-    }
+    // if (completedFiles.length > 0 && onUploadComplete) {
+    //   onUploadComplete(completedFiles);
+    // }
   };
 
   const handleDragOver = (e: React.DragEvent) => {

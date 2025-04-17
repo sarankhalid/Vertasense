@@ -15,11 +15,24 @@ export const authProviderClient: AuthProvider = {
 
         console.log("Data : ", data)
         console.log("Error : ", error)
+        console.log("Error type: ", typeof error)
+        console.log("Error structure: ", JSON.stringify(error, null, 2))
 
         if (error) {
+            let errorMessage = "An error occurred during login. Please try again.";
+            
+            // Handle specific error types
+            if (error.message === "Invalid login credentials") {
+                errorMessage = "Invalid email or password. Please check your credentials and try again.";
+            } else if (error.message.includes("Email not confirmed")) {
+                errorMessage = "Please verify your email address before logging in.";
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
             return {
                 success: false,
-                error,
+                error: new Error(errorMessage)
             };
         }
 

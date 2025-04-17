@@ -6,6 +6,38 @@ type ClauseMapping = {
   potential_gaps: string;
 };
 
+/**
+ * UserDocument interface - Represents the database schema for user_documents table
+ */
+export interface UserDocument {
+  id: string;                      // UUID
+  client_certificate_id: string;   // UUID
+  vector_store_id: string;         // Text
+  created_at: string;              // Timestamp with time zone
+  updated_at: string;              // Timestamp with time zone
+  documents_tags: {                // JSONB
+    rationale: string;
+    confidence: number;
+    document_name: string;
+    document_types: string[];
+  } | null;
+  mapped_clauses: {                // JSONB
+    file_name: string;
+    clause_mappings: ClauseMapping[] | ClauseMapping; // Can be an array or a single object
+  } | null;
+  name: string;                    // Character varying
+  size: number;                    // Bigint
+  file_id: string;                 // Text - OpenAI file ID in format file-XXXX
+  type: string;                    // Character varying
+  extension: string;               // Character varying
+  path: string;                    // Text
+  processing_status: string;       // Character varying
+  error: string | null;            // Text - Stores error information when document processing fails
+}
+
+/**
+ * Document type - Used for frontend representation of documents
+ */
 export type Document = {
   id: string;
   title: string;

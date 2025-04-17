@@ -25,7 +25,6 @@ export const accessControlProvider: AccessControlProvider = {
             .eq("user_id", user.id)
             .single();
 
-        console.log("Org Users : ", roleData)
 
 
         if (roleError) {
@@ -51,7 +50,6 @@ export const accessControlProvider: AccessControlProvider = {
             .eq("name", resource)
             .single();
 
-        console.log("Resource Data : ", resourceData);
 
         if (resourceError || !resourceData?.id) {
             return {

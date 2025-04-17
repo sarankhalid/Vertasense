@@ -175,14 +175,6 @@ export function DocumentTable({
           <TableHeader>
             <TableRow>
               <CanAccess resource="document" action="delete">
-                {/* <TableHead className="w-[40px]">
-                  <Checkbox
-                    checked={allSelected}
-                    indeterminate={someSelected}
-                    onCheckedChange={toggleAllDocuments}
-                    aria-label="Select all documents"
-                  />
-                </TableHead> */}
                 <TableHead className="w-[40px]">
                   <Checkbox
                     checked={allSelected}

@@ -18,7 +18,7 @@ export function DocumentHeader({
   onAddDocument,
   onBulkUpload,
   onBrowseFolders,
-  onAiClassification,
+  // onAiClassification,
   isClassifying = false,
   searchTerm,
   onSearchChange,
@@ -56,7 +56,7 @@ export function DocumentHeader({
             Browse Folders
           </Button>
         )}
-        {onAiClassification && (
+        {/* {onAiClassification && (
           <Button 
             variant="outline" 
             className="flex items-center gap-2" 
@@ -66,7 +66,7 @@ export function DocumentHeader({
             <Brain className="h-4 w-4" />
             {isClassifying ? "Classifying..." : "AI Classification"}
           </Button>
-        )}
+        )} */}
         <div className="flex-1 flex items-center">
           <div className="relative w-full max-w-sm ml-auto">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
