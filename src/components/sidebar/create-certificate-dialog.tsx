@@ -73,6 +73,9 @@ export function CreateCertificateDialog({ open, onOpenChange }: CreateCertificat
         ])
         .select();
 
+      // First close the dialog before any further operations
+      onOpenChange(false);
+      
       if (clientCertificateError) {
         console.error("Error creating client certification:", clientCertificateError);
       } else {
@@ -80,7 +83,10 @@ export function CreateCertificateDialog({ open, onOpenChange }: CreateCertificat
         
         // Refresh the certificates list to show the newly added certificate
         if (selectedCompany?.id) {
-          await fetchCertificates(selectedCompany.id);
+          // Use setTimeout to delay the fetch until after the dialog is fully closed
+          setTimeout(() => {
+            fetchCertificates(selectedCompany.id);
+          }, 100);
         }
         
         // Publish a live event for the new certificate
@@ -95,14 +101,18 @@ export function CreateCertificateDialog({ open, onOpenChange }: CreateCertificat
       }
     } catch (err) {
       console.error("Failed to add certificate:", err);
+      // Close the dialog even if there's an error
+      onOpenChange(false);
     } finally {
       setIsCreating(false);
-      onOpenChange(false);
     }
   };
 
+  // If the dialog is not open, don't render anything
+  if (!open) return null;
+  
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={true} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Certificate</DialogTitle>

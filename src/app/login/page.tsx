@@ -70,8 +70,8 @@ export default function Login() {
     },
   });
 
-  // Get the functions from our auth store
-  const { setOrganizations, setSelectedOrganization } = useAuthStore();
+  // We don't need to use the auth store functions here anymore
+  // Organizations will be loaded by OrganizationLoader component
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -84,10 +84,6 @@ export default function Login() {
           email: values.email,
           password: values.password,
         });
-
-      // Log the response for debugging
-      console.log("Login response - Data:", data);
-      console.log("Login response - Error:", error);
 
       // Handle login error
       if (error) {
@@ -113,74 +109,9 @@ export default function Login() {
 
       // If login is successful
       if (data?.session) {
-        try {
-          // Fetch user data
-          const { data: userData } = await supabaseBrowserClient.auth.getUser();
-
-          const { data: consultantRoleData } = await supabaseBrowserClient
-            .from("roles")
-            .select("id")
-            .eq("name", "CONSULTANT")
-            .single();
-
-          if (userData?.user) {
-            // Fetch user's organizations and role from org_users table
-            const { data: orgUserData, error: orgUserError } =
-              await supabaseBrowserClient
-                .from("org_users")
-                .select(
-                  `
-                  id,
-                  organization_id,
-                  role_id,
-                  organizations:organization_id (
-                    id,
-                    name,
-                    type
-                  ),
-                  roles:role_id (
-                    id,
-                    name
-                  )
-                `
-                )
-                .eq("user_id", userData.user.id)
-                .neq("role_id", consultantRoleData?.id);
-
-            if (orgUserError) {
-              console.error(
-                "Error fetching user organization/role:",
-                orgUserError
-              );
-            } else if (orgUserData && orgUserData.length > 0) {
-              // Extract organizations from the data with their associated roles
-              const organizations = orgUserData
-                .filter((item: any) => item.organizations && item.roles)
-                .map((item: any) => ({
-                  id: item.organizations.id,
-                  name: item.organizations.name,
-                  type: item.organizations.type,
-                  role: item.roles?.name,
-                }));
-
-              // Store organizations in global state
-              if (organizations.length > 0) {
-                setOrganizations(organizations);
-
-                // If there's only one organization, set it as selected
-                if (organizations.length === 1) {
-                  setSelectedOrganization(organizations[0]);
-                }
-              }
-            }
-          }
-
-          // Navigate to dashboard
-          router.push("/dashboard");
-          router.refresh();
-        } catch (error) {
-          console.error("Error after successful login:", error);
-        }
+        // Navigate to dashboard - organizations will be loaded by OrganizationLoader
+        router.push("/dashboard");
+        router.refresh();
       } else {
         setErrorMessage("Login failed. Please try again.");
         setIsLoading(false);

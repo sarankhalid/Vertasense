@@ -61,101 +61,134 @@ export function CompanySelector({ className }: CompanySelectorProps) {
   const [open, setOpen] = React.useState(false);
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
 
-  // Reset selected company when organization changes
-  React.useEffect(() => {
-    if (selectedOrganization) {
-      // Reset selected company when organization changes
-      setSelectedCompany(null);
-    }
-  }, [selectedOrganization, setSelectedCompany]);
+  // Track the last organization ID to detect changes
+  const [lastOrgId, setLastOrgId] = React.useState<string | null>(null);
+  
+  // Use a ref to track if we've already fetched companies for this organization
+  const fetchedForOrgRef = React.useRef<string | null>(null);
 
   // Fetch companies when the organization changes
   React.useEffect(() => {
-    if (selectedOrganization) {
-      const fetchUserCompanies = async () => {
-        try {
-          // First, get the user data
-          const { data: userData } = await supabaseBrowserClient.auth.getUser();
+    // Skip if no organization is selected or if we're already loading
+    if (!selectedOrganization || loadingCompanies) {
+      return;
+    }
+    
+    const orgId = selectedOrganization.id;
+    
+    // Define the fetchUserCompanies function
+    const fetchUserCompanies = async () => {
+      if (!selectedOrganization) return;
+      
+      try {
+        // First, get the user data
+        const { data: userData } = await supabaseBrowserClient.auth.getUser();
 
-          if (!userData?.user) {
-            console.error("User not authenticated");
-            return;
-          }
-
-          // 1. First check in org_relation to find companies linked to the selected organization
-          const { data: orgRelations, error: orgRelationsError } =
-            await supabaseBrowserClient
-              .from("org_relations")
-              .select("org_2")
-              .eq("org_1", selectedOrganization.id);
-
-          if (orgRelationsError) {
-            console.error("Error fetching org relations:", orgRelationsError);
-            return;
-          }
-
-          // Extract company IDs from org_relations
-          const companyIds = orgRelations.map((relation) => relation.org_2);
-
-          if (companyIds.length === 0) {
-            // No linked companies found
-            setCompanies([]);
-            return;
-          }
-
-          // 2. Check in org_users to find which companies the user is attached to
-          const { data: userCompanies, error: userCompaniesError } =
-            await supabaseBrowserClient
-              .from("org_users")
-              .select(
-                `
-              organization_id,
-              organizations:organization_id (
-                id,
-                name,
-                type
-              )
-            `
-              )
-              .eq("user_id", userData.user.id)
-              .in("organization_id", companyIds);
-
-          if (userCompaniesError) {
-            console.error("Error fetching user companies:", userCompaniesError);
-            return;
-          }
-
-          // Extract and format the companies
-          const formattedCompanies = userCompanies
-            .filter((item: any) => item.organizations)
-            .map((item: any) => ({
-              id: item.organizations.id,
-              name: item.organizations.name,
-              type: item.organizations.type,
-            }));
-
-          // Update the companies in the store
-          setCompanies(formattedCompanies);
-
-          // If there's only one company, set it as selected
-          if (formattedCompanies.length === 1) {
-            setSelectedCompany(formattedCompanies[0]);
-          }
-        } catch (error) {
-          console.error("Error fetching user companies:", error);
+        if (!userData?.user) {
+          console.error("User not authenticated");
+          return;
         }
-      };
 
-      // Use the standard fetchCompanies for now, but we'll replace it with our custom logic
+        // 1. First check in org_relation to find companies linked to the selected organization
+        const { data: orgRelations, error: orgRelationsError } =
+          await supabaseBrowserClient
+            .from("org_relations")
+            .select("org_2")
+            .eq("org_1", selectedOrganization.id);
 
-      // If the user is an EMPLOYEE in a CONSULTING_FIRM, also fetch their assigned companies
-      if (
-        selectedOrganization.role === "EMPLOYEE" &&
-        selectedOrganization.type === "CONSULTING_FIRM"
-      ) {
-        fetchUserCompanies();
-      } else {
-        fetchCompanies(selectedOrganization.id);
+        if (orgRelationsError) {
+          console.error("Error fetching org relations:", orgRelationsError);
+          return;
+        }
+
+        // Extract company IDs from org_relations
+        const companyIds = orgRelations.map((relation) => relation.org_2);
+
+        if (companyIds.length === 0) {
+          // No linked companies found
+          setCompanies([]);
+          return;
+        }
+
+        // 2. Check in org_users to find which companies the user is attached to
+        const { data: userCompanies, error: userCompaniesError } =
+          await supabaseBrowserClient
+            .from("org_users")
+            .select(
+              `
+            organization_id,
+            organizations:organization_id (
+              id,
+              name,
+              type
+            )
+          `
+            )
+            .eq("user_id", userData.user.id)
+            .in("organization_id", companyIds);
+
+        if (userCompaniesError) {
+          console.error("Error fetching user companies:", userCompaniesError);
+          return;
+        }
+
+        // Extract and format the companies
+        const formattedCompanies = userCompanies
+          .filter((item: any) => item.organizations)
+          .map((item: any) => ({
+            id: item.organizations.id,
+            name: item.organizations.name,
+            type: item.organizations.type,
+          }));
+
+        // Update the companies in the store
+        setCompanies(formattedCompanies);
+
+        // If there's only one company, set it as selected
+        if (formattedCompanies.length === 1) {
+          setSelectedCompany(formattedCompanies[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching user companies:", error);
+      }
+    };
+    
+    if (selectedOrganization) {
+      const orgId = selectedOrganization.id;
+      
+      // Organization has changed
+      if (orgId !== lastOrgId) {
+        console.log("Organization changed, fetching companies for new organization");
+        fetchedForOrgRef.current = orgId;
+        
+        // If the user is an EMPLOYEE in a CONSULTING_FIRM, fetch their assigned companies
+        if (
+          selectedOrganization.role === "EMPLOYEE" &&
+          selectedOrganization.type === "CONSULTING_FIRM"
+        ) {
+          fetchUserCompanies();
+        } else {
+          fetchCompanies(selectedOrganization.id);
+        }
+        
+        setLastOrgId(orgId);
+        return; // Return early to avoid duplicate fetching
+      }
+      
+      // If we haven't fetched for this organization yet and we're not loading
+      if (fetchedForOrgRef.current !== orgId && !loadingCompanies) {
+        console.log("First time fetching for this organization");
+        fetchedForOrgRef.current = orgId;
+        
+        // If the user is an EMPLOYEE in a CONSULTING_FIRM, fetch their assigned companies
+        if (
+          selectedOrganization.role === "EMPLOYEE" &&
+          selectedOrganization.type === "CONSULTING_FIRM"
+        ) {
+          fetchUserCompanies();
+        } else {
+          fetchCompanies(selectedOrganization.id);
+        }
       }
     }
   }, [
@@ -163,6 +196,8 @@ export function CompanySelector({ className }: CompanySelectorProps) {
     fetchCompanies,
     setCompanies,
     setSelectedCompany,
+    loadingCompanies,
+    lastOrgId
   ]);
 
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
