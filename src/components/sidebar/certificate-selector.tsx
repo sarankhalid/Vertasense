@@ -46,24 +46,35 @@ export function CertificateSelector({ className }: CertificateSelectorProps) {
   // Use a ref to track if we've already fetched certificates for this company
   const fetchedForCompanyRef = React.useRef<string | null>(null);
 
+  // Track if this is the initial load after page refresh
+  const isInitialLoad = React.useRef(true);
+
   // When the selected company changes, fetch its certificates
-  // We don't reset the selected certificate anymore
-  // This prevents the selected certificate from changing when the page reloads
   React.useEffect(() => {
     // Skip if no company is selected or if we're already loading
     if (!selectedCompanyId || loadingCertificates) {
       return;
     }
     
-    // Company has changed
+    // Company has changed - but don't reset certificate on initial page load
     if (selectedCompanyId !== lastCompanyId) {
       console.log("Company changed, fetching certificates for new company");
       fetchedForCompanyRef.current = selectedCompanyId;
       fetchCertificates(selectedCompanyId);
-      setLastCompanyId(selectedCompanyId);
       
-      // Reset selected certificate when company changes
-      setSelectedCertificate(null);
+      // Only reset the selected certificate if this is not the initial load
+      // This prevents the certificate from changing on page reload
+      if (!isInitialLoad.current) {
+        console.log("Not initial load, resetting selected certificate");
+        // Reset selected certificate when company changes
+        // This will also remove it from localStorage via the effect in SelectionPersistence
+        setSelectedCertificate(null);
+      } else {
+        console.log("Initial load, preserving selected certificate");
+        isInitialLoad.current = false;
+      }
+      
+      setLastCompanyId(selectedCompanyId);
       return;
     }
     

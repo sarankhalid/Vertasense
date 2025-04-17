@@ -136,6 +136,8 @@ export function SelectionPersistence() {
   useEffect(() => {
     if (selectedCompany) {
       localStorage.setItem("selectedCompany", JSON.stringify(selectedCompany));
+    } else {
+      localStorage.removeItem("selectedCompany");
     }
   }, [selectedCompany]);
 
@@ -143,6 +145,8 @@ export function SelectionPersistence() {
   useEffect(() => {
     if (selectedCertificate) {
       localStorage.setItem("selectedCertificate", JSON.stringify(selectedCertificate));
+    } else {
+      localStorage.removeItem("selectedCertificate");
     }
   }, [selectedCertificate]);
 

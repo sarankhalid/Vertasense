@@ -34,6 +34,7 @@ import { AssignCompanyDialog } from "./assign-company-dialog";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCompanyStore } from "@/store/useCompanyStore";
 import { useConsultantStore } from "@/store/useConsultantStore";
+import { useCertificateStore } from "@/store/useCertificateStore";
 import ConsultantDetails from "./consultant-details";
 
 // Define interfaces for our component
@@ -49,15 +50,6 @@ interface ConsultantUI {
   status: string;
 }
 
-// Mock data for certificates
-const certificates = [
-  { id: "iso9001", name: "ISO 9001:2015 - Quality Management" },
-  { id: "iso14001", name: "ISO 14001:2015 - Environmental Management" },
-  { id: "iso45001", name: "ISO 45001:2018 - Occupational Health & Safety" },
-  { id: "iso27001", name: "ISO 27001:2022 - Information Security" },
-  { id: "iso22000", name: "ISO 22000:2018 - Food Safety" },
-];
-
 export default function ConsultantManagement() {
   const { selectedOrganization } = useAuthStore();
   const { companies } = useCompanyStore();
@@ -71,45 +63,12 @@ export default function ConsultantManagement() {
     assignCompanyandCertificationsToConsultant,
     deleteConsultant,
   } = useConsultantStore();
+  
+  const { certifications, fetchAllCertifications } = useCertificateStore();
 
-  // Sample data for initial UI development
-  const initialConsultantsUI: ConsultantUI[] = [
-    {
-      id: "CON-001",
-      name: "John Smith",
-      email: "john.smith@example.com",
-      phone: "+1 (555) 123-4567",
-      specialization: "Quality Management",
-      companies: [
-        { id: "COM-001", name: "Acme Inc", certificates: ["iso9001"] },
-        {
-          id: "COM-003",
-          name: "TechSolutions Ltd",
-          certificates: ["iso9001", "iso27001"],
-        },
-      ],
-      certificates: ["iso9001", "iso14001"],
-      status: "Active",
-    },
-    {
-      id: "CON-002",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@example.com",
-      phone: "+1 (555) 987-6543",
-      specialization: "Environmental Management",
-      companies: [
-        { id: "COM-002", name: "EcoSystems Corp", certificates: ["iso14001"] },
-      ],
-      certificates: ["iso14001", "iso45001"],
-      status: "Active",
-    },
-  ];
-
-  // State for UI consultants (will be replaced with API data)
-  const [consultantsUI, setConsultantsUI] =
-    useState<ConsultantUI[]>(initialConsultantsUI);
-  const [selectedConsultantUI, setSelectedConsultantUI] =
-    useState<ConsultantUI | null>(initialConsultantsUI[0]);
+  // State for UI consultants
+  const [consultantsUI, setConsultantsUI] = useState<ConsultantUI[]>([]);
+  const [selectedConsultantUI, setSelectedConsultantUI] = useState<ConsultantUI | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
@@ -118,12 +77,13 @@ export default function ConsultantManagement() {
     null
   );
 
-  // Fetch consultants when the component mounts or organization changes
+  // Fetch consultants and certifications when the component mounts or organization changes
   useEffect(() => {
     if (selectedOrganization?.id) {
       fetchConsultants(selectedOrganization.id);
+      fetchAllCertifications();
     }
-  }, [selectedOrganization, fetchConsultants]);
+  }, [selectedOrganization, fetchConsultants, fetchAllCertifications]);
 
   // Convert API consultants to UI format
   useEffect(() => {
@@ -305,8 +265,8 @@ export default function ConsultantManagement() {
   };
 
   const getCertificateName = (certificateId: string) => {
-    const certificate = certificates.find((c) => c.id === certificateId);
-    return certificate ? certificate.name.split(" - ")[0] : certificateId;
+    const certification = certifications.find((c) => c.id === certificateId);
+    return certification ? certification.name.split(" - ")[0] : certificateId;
   };
 
   return (
@@ -443,7 +403,7 @@ export default function ConsultantManagement() {
           {selectedConsultantUI ? (
             <ConsultantDetails
               consultant={selectedConsultantUI}
-              certificates={certificates}
+              certificates={certifications}
               getCertificateName={getCertificateName}
               onAssignCompany={() => setIsAssignDialogOpen(true)}
             />
@@ -462,7 +422,7 @@ export default function ConsultantManagement() {
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onSave={handleAddConsultant}
-        certificates={certificates}
+        certificates={certifications}
         consultant={isEditMode ? consultantToEdit : undefined}
         mode={isEditMode ? "edit" : "add"}
       />
@@ -474,7 +434,7 @@ export default function ConsultantManagement() {
           onOpenChange={setIsAssignDialogOpen}
           consultant={selectedConsultantUI}
           companies={companies as any}
-          certificates={certificates}
+          certificates={certifications}
           onAssign={(companyId, certificateIds) =>
             handleAssignCompany(
               selectedConsultantUI?.user_id || "",

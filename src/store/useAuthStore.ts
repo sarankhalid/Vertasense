@@ -35,10 +35,17 @@ export const useAuthStore = create<AuthState>()(
         selectedOrganization: state.selectedOrganization || (organizations.length > 0 ? organizations[0] : null)
       })),
       setSelectedOrganization: (selectedOrganization) => set({ selectedOrganization }),
-      clearAuth: () => set({ 
-        organizations: [], 
-        selectedOrganization: null
-      }),
+      clearAuth: () => {
+        // Clear organization-related localStorage items
+        localStorage.removeItem("selectedCompany");
+        localStorage.removeItem("selectedCertificate");
+        
+        // Reset the state
+        set({ 
+          organizations: [], 
+          selectedOrganization: null
+        });
+      },
     }),
     {
       name: "auth-storage", // name of the item in storage

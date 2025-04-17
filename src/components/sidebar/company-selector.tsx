@@ -66,6 +66,9 @@ export function CompanySelector({ className }: CompanySelectorProps) {
   
   // Use a ref to track if we've already fetched companies for this organization
   const fetchedForOrgRef = React.useRef<string | null>(null);
+  
+  // Track if this is the initial load after page refresh
+  const isInitialLoad = React.useRef(true);
 
   // Fetch companies when the organization changes
   React.useEffect(() => {
@@ -156,24 +159,35 @@ export function CompanySelector({ className }: CompanySelectorProps) {
     if (selectedOrganization) {
       const orgId = selectedOrganization.id;
       
-      // Organization has changed
-      if (orgId !== lastOrgId) {
-        console.log("Organization changed, fetching companies for new organization");
-        fetchedForOrgRef.current = orgId;
-        
-        // If the user is an EMPLOYEE in a CONSULTING_FIRM, fetch their assigned companies
-        if (
-          selectedOrganization.role === "EMPLOYEE" &&
-          selectedOrganization.type === "CONSULTING_FIRM"
-        ) {
-          fetchUserCompanies();
-        } else {
-          fetchCompanies(selectedOrganization.id);
-        }
-        
-        setLastOrgId(orgId);
-        return; // Return early to avoid duplicate fetching
+    // Organization has changed
+    if (orgId !== lastOrgId) {
+      console.log("Organization changed, fetching companies for new organization");
+      fetchedForOrgRef.current = orgId;
+      
+      // Only reset the selected company if this is not the initial load
+      // This prevents the company from changing on page reload
+      if (!isInitialLoad.current) {
+        console.log("Not initial load, resetting selected company");
+        // Reset selected company when organization changes
+        setSelectedCompany(null);
+      } else {
+        console.log("Initial load, preserving selected company");
+        isInitialLoad.current = false;
       }
+      
+      // If the user is an EMPLOYEE in a CONSULTING_FIRM, fetch their assigned companies
+      if (
+        selectedOrganization.role === "EMPLOYEE" &&
+        selectedOrganization.type === "CONSULTING_FIRM"
+      ) {
+        fetchUserCompanies();
+      } else {
+        fetchCompanies(selectedOrganization.id);
+      }
+      
+      setLastOrgId(orgId);
+      return; // Return early to avoid duplicate fetching
+    }
       
       // If we haven't fetched for this organization yet and we're not loading
       if (fetchedForOrgRef.current !== orgId && !loadingCompanies) {

@@ -5,7 +5,12 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { supabaseBrowserClient } from "@/utils/supabase/client";
 
 export function OrganizationLoader() {
-  const { organizations, setOrganizations, selectedOrganization, setSelectedOrganization } = useAuthStore();
+  const {
+    organizations,
+    setOrganizations,
+    selectedOrganization,
+    setSelectedOrganization,
+  } = useAuthStore();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -87,7 +92,12 @@ export function OrganizationLoader() {
     };
 
     loadOrganizations();
-  }, [organizations.length, selectedOrganization, setOrganizations, setSelectedOrganization]);
+  }, [
+    organizations.length,
+    selectedOrganization,
+    setOrganizations,
+    setSelectedOrganization,
+  ]);
 
   // This component doesn't render anything visible
   return null;

@@ -40,11 +40,11 @@ type NavItem = {
 
 // Define the base navigation items
 const getNavItems = (): NavItem[] => [
-  {
-    icon: <Home className="w-5 h-5" />,
-    label: "Dashboard",
-    href: "/dashboard",
-  },
+  // {
+  //   icon: <Home className="w-5 h-5" />,
+  //   label: "Dashboard",
+  //   href: "/dashboard",
+  // },
   {
     icon: <PieChart className="w-5 h-5" />,
     label: "Analysis",

@@ -110,7 +110,7 @@ export default function Login() {
       // If login is successful
       if (data?.session) {
         // Navigate to dashboard - organizations will be loaded by OrganizationLoader
-        router.push("/dashboard");
+        router.push("/dashboard/documents");
         router.refresh();
       } else {
         setErrorMessage("Login failed. Please try again.");

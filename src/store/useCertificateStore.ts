@@ -168,6 +168,10 @@ export const useCertificateStore = create<CertificateState>()(
       
       // Reset
       clearCertificates: () => {
+        // Remove from localStorage
+        localStorage.removeItem("selectedCertificate");
+        
+        // Reset the state
         set({ 
           certificates: [],
           selectedCertificate: null,

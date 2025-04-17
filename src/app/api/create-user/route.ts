@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(
             email,
             {
-                redirectTo: `${url}/reset-password`,
+                redirectTo: `https://vertasense.vercel.app/reset-password`,
                 data: { role, name, email, phone, organization_id }, // Store the role in user metadata
                 
             }
