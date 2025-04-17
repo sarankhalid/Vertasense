@@ -263,9 +263,14 @@ export function GapAnalysis() {
             ? Math.round(totalImplementation / clauses.length)
             : 0;
 
+        // Get the section title from the first clause in the section
+        const sectionTitle = clauses.length > 0 && clauses[0].title 
+          ? clauses[0].title 
+          : getSectionTitle(sectionNumber); // Fallback to predefined title if not available
+
         return {
           id: `section-${sectionNumber}`,
-          title: getSectionTitle(sectionNumber),
+          title: sectionTitle,
           clauses,
           implementationPercentage: avgImplementation,
         };
@@ -300,29 +305,74 @@ export function GapAnalysis() {
   }, [clauseSections]);
 
   // Calculate non-conformity statistics
+  // const nonConformityStats = React.useMemo(() => {
+  //   // Count non-conformities from the clauses
+  //   let major = 0;
+  //   let minor = 0;
+  //   const observation = 0;
+  //   let open = 0;
+  //   let inProgress = 0;
+  //   let closed = 0;
+
+  //   clauseSections.forEach((section) => {
+  //     section.clauses.forEach((clause) => {
+  //       if (clause.conformityStatus?.includes("Major")) {
+  //         major++;
+  //         if (clause.gapClosureStatus === "open") open++;
+  //         else if (clause.gapClosureStatus === "in-progress") inProgress++;
+  //         else if (clause.gapClosureStatus === "closed") closed++;
+  //       } else if (clause.conformityStatus?.includes("Minor")) {
+  //         minor++;
+  //         if (clause.gapClosureStatus === "open") open++;
+  //         else if (clause.gapClosureStatus === "in-progress") inProgress++;
+  //         else if (clause.gapClosureStatus === "closed") closed++;
+  //       }
+  //     });
+  //   });
+
+  //   const total = major + minor + observation;
+
+  //   return { total, major, minor, observation, open, inProgress, closed };
+  // }, [clauseSections]);
+
   const nonConformityStats = React.useMemo(() => {
-    // Count non-conformities from the clauses
     let major = 0;
     let minor = 0;
-    const observation = 0;
+    let observation = 0;
     let open = 0;
     let inProgress = 0;
     let closed = 0;
 
-    clauseSections.forEach((section) => {
-      section.clauses.forEach((clause) => {
-        if (clause.conformityStatus?.includes("Major")) {
-          major++;
-          if (clause.gapClosureStatus === "open") open++;
-          else if (clause.gapClosureStatus === "in-progress") inProgress++;
-          else if (clause.gapClosureStatus === "closed") closed++;
-        } else if (clause.conformityStatus?.includes("Minor")) {
-          minor++;
-          if (clause.gapClosureStatus === "open") open++;
-          else if (clause.gapClosureStatus === "in-progress") inProgress++;
-          else if (clause.gapClosureStatus === "closed") closed++;
-        }
-      });
+    console.log("Clause Sections : ", gapData);
+
+    gapData.forEach((section) => {
+      console.log("Section : ", section);
+      if (section.analysis.output["Gap Severity"] === "High") {
+        major++;
+      } else if (section.analysis.output["Gap Severity"] === "Medium") {
+        minor++;
+      } else if (section.analysis.output["Gap Severity"] === "Low") {
+        observation++;
+      }
+      //   if (clause.gapClosureStatus === "open") open++;
+      //   else if (clause.gapClosureStatus === "in-progress") inProgress++;
+      //   else if (clause.gapClosureStatus === "closed") closed++;
+      // section.clauses.forEach((clause) => {
+      //   const gapSeverity = clause?.gapSeverity?.toLowerCase(); // You need to bring gapSeverity when transforming!
+      //   // console.log("Gap Severity : ", gapSeverity);
+      //   if (gapSeverity === "high") {
+      //     major++;
+      //   } else if (gapSeverity === "medium") {
+      //     minor++;
+      //   } else if (gapSeverity === "low") {
+      //     observation++;
+      //   }
+
+      //   // Gap closure status calculation can remain (if available)
+      //   if (clause.gapClosureStatus === "open") open++;
+      //   else if (clause.gapClosureStatus === "in-progress") inProgress++;
+      //   else if (clause.gapClosureStatus === "closed") closed++;
+      // });
     });
 
     const total = major + minor + observation;
@@ -468,7 +518,10 @@ export function GapAnalysis() {
             const newStatus = payload.new.status;
             if (newStatus === "completed_analysis") {
               toast.success("Gap analysis completed");
-            } else if (newStatus === "processing" || newStatus === "in_progress") {
+            } else if (
+              newStatus === "processing" ||
+              newStatus === "in_progress"
+            ) {
               toast.info("Gap analysis in progress...");
             }
           }
@@ -688,7 +741,7 @@ export function GapAnalysis() {
           implementationPercentage={overallImplementation}
         />
         <NonConformitiesCard stats={nonConformityStats} />
-        <GapStatusCard stats={nonConformityStats} />
+        {/* <GapStatusCard stats={nonConformityStats} /> */}
       </div>
 
       <Card>

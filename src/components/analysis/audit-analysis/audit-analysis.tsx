@@ -583,19 +583,19 @@ export function AuditAnalysis() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3 mb-6">
-          <AuditSummaryCard
+          {/* <AuditSummaryCard
             auditDate={new Date().toLocaleDateString()}
             auditor="ISO Compliance Team"
             auditType="Internal"
             standard="ISO 27001"
             overallResult="conditional-pass"
-          />
+          /> */}
           <AuditFindingsCard
             major={auditFindingsStats.major}
             minor={auditFindingsStats.minor}
             observation={auditFindingsStats.observation}
           />
-          <ComplianceStatusCard sections={auditAnalysisSections.slice(0, 5)} />
+          {/* <ComplianceStatusCard sections={auditAnalysisSections.slice(0, 5)} /> */}
         </div>
 
         <AuditFindingsDetail
