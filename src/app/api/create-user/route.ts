@@ -995,8 +995,8 @@ export async function POST(request: NextRequest) {
             }
 
             // Explicitly type orgUserData as an array
-            // Explicitly type orgUserData as an array or null
-            let orgUserData: any[] | null = null;
+            // Define a type for the org_users operation result
+            let orgUserData: any[] = [];
 
             if (existingOrgUser?.length > 0) {
                 const result = await supabaseAdmin
@@ -1005,7 +1005,7 @@ export async function POST(request: NextRequest) {
                     .eq('user_id', existingUser[0].user_id)
                     .eq('organization_id', organization_id);
 
-                orgUserData = result.data;
+                orgUserData = result.data || [];
             } else {
                 const result = await supabaseAdmin
                     .from('org_users')
@@ -1019,10 +1019,10 @@ export async function POST(request: NextRequest) {
                         },
                     ]);
 
-                orgUserData = result.data;
+                orgUserData = result.data || [];
             }
 
-            if (orgUserData?.length === 0) {
+            if (orgUserData.length === 0) {
                 return NextResponse.json({ message: 'Error updating/inserting into org_users' }, { status: 500 });
             }
 
