@@ -279,7 +279,7 @@ export const useConsultantStore = create<ConsultantState>()(
         try {
 
           console.log("Consultant Id : ", consultantId)
-          
+
           // Add the company to the consultant's companies
           const { error: companyError } = await supabaseBrowserClient
             .from("org_users")
@@ -300,6 +300,7 @@ export const useConsultantStore = create<ConsultantState>()(
               certificateIds.map((certId) => ({
                 user_id: consultantId,
                 client_certification_id: certId,
+                organization_id: companyId
               }))
             );
 

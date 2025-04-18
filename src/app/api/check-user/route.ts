@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, User } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_URL, SERVICE_ROLE_KEY } from "@/utils/supabase/constants";
 
 export async function POST(request: NextRequest) {
@@ -7,6 +7,8 @@ export async function POST(request: NextRequest) {
         // Parse the request body
         const body = await request.json();
         const { email } = body;
+
+        console.log("Email : ", email)
 
         if (!email) {
             return NextResponse.json(
@@ -18,9 +20,6 @@ export async function POST(request: NextRequest) {
         // Create a Supabase client with the service role key for admin operations
         const supabaseAdmin = createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!);
 
-        // Define the site URL with fallback
-        const url = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-        console.log("Using site URL:", url);
 
         // Fetch the list of users
         const { data: users, error: fetchUserError } = await supabaseAdmin.auth.admin.listUsers();
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ message: fetchUserError.message }, { status: 500 });
         }
 
-        if (!users || !users.users || users.users.length === 0) {
+        if (!users || users.length === 0) {
             // In case there are no users in the response
             return NextResponse.json(
                 { message: "No users found in the database." },
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
 
         // Find the user with the provided email
         // The users object from Supabase has a 'users' property that contains the array
-        const user = users.users?.find((user: User) => user.email === email);
+        const user = users.users?.find((user) => user.email === email);
 
         if (user) {
             // Check if the email is verified
@@ -59,6 +58,9 @@ export async function POST(request: NextRequest) {
                 );
             }
         }
+
+        // If no user is found, proceed with the user invitation or other logic
+        console.log("User does not exist. Proceeding with the invitation.");
 
         return NextResponse.json(
             { message: "User does not exist, invite logic can go here." },

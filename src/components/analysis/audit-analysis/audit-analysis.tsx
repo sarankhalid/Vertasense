@@ -524,9 +524,9 @@ export function AuditAnalysis() {
                   <Loader className="h-4 w-4 mr-2 animate-spin" />
                   <span>Starting Analysis...</span>
                 </>
-              ) : (
-                <span>AI Analysis</span>
-              )}
+            ) : (
+              <span>Start Audit Analysis</span>
+            )}
             </Button>
           </div>
 
@@ -577,7 +577,7 @@ export function AuditAnalysis() {
                 <span>Starting Analysis...</span>
               </>
             ) : (
-              <span>AI Analysis</span>
+              <span>Start Audit Analysis</span>
             )}
           </Button>
         </div>

@@ -29,14 +29,43 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       organizations: [],
       selectedOrganization: null,
-      setOrganizations: (organizations) => set((state) => ({ 
-        organizations,
-        // If there's at least one organization and no selected organization, select the first one
-        selectedOrganization: state.selectedOrganization || (organizations.length > 0 ? organizations[0] : null)
-      })),
-      setSelectedOrganization: (selectedOrganization) => set({ selectedOrganization }),
+      setOrganizations: (organizations) => {
+        // Try to restore the selected organization from localStorage first
+        let restoredOrg = null;
+        try {
+          const savedOrg = localStorage.getItem("selectedOrganization");
+          if (savedOrg) {
+            const parsedOrg = JSON.parse(savedOrg);
+            // Find the organization in the new organizations list to ensure it's valid
+            restoredOrg = organizations.find(org => org.id === parsedOrg.id) || null;
+            console.log("useAuthStore: Restored organization from localStorage:", restoredOrg?.name || "not found");
+          }
+        } catch (error) {
+          console.error("Error restoring organization from localStorage:", error);
+        }
+        
+        set((state) => ({ 
+          organizations,
+          // Priority: 1. Current selection if valid, 2. Restored from localStorage if valid, 3. First organization
+          selectedOrganization: 
+            (state.selectedOrganization && organizations.some(org => org.id === state.selectedOrganization?.id)) 
+              ? state.selectedOrganization 
+              : restoredOrg || (organizations.length > 0 ? organizations[0] : null)
+        }));
+      },
+      setSelectedOrganization: (selectedOrganization) => {
+        // Save to localStorage explicitly
+        if (selectedOrganization) {
+          localStorage.setItem("selectedOrganization", JSON.stringify(selectedOrganization));
+        } else {
+          localStorage.removeItem("selectedOrganization");
+        }
+        
+        set({ selectedOrganization });
+      },
       clearAuth: () => {
         // Clear organization-related localStorage items
+        localStorage.removeItem("selectedOrganization");
         localStorage.removeItem("selectedCompany");
         localStorage.removeItem("selectedCertificate");
         

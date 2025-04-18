@@ -13,13 +13,36 @@ export function OrganizationLoader() {
   } = useAuthStore();
   const [loading, setLoading] = useState(false);
 
+  console.log("Organizations : ", organizations);
+
+  // First effect: Try to restore organization from localStorage immediately
+  useEffect(() => {
+    // Only try to restore if there's no selected organization
+    if (!selectedOrganization) {
+      try {
+        const savedOrg = localStorage.getItem("selectedOrganization");
+        if (savedOrg) {
+          const parsedOrg = JSON.parse(savedOrg);
+          console.log("OrganizationLoader: Immediately restoring organization from localStorage:", parsedOrg.name);
+          setSelectedOrganization(parsedOrg);
+        }
+      } catch (error) {
+        console.error("Error restoring organization from localStorage:", error);
+      }
+    }
+  }, [selectedOrganization, setSelectedOrganization]);
+
+  // Second effect: Load organizations from the server
   useEffect(() => {
     const loadOrganizations = async () => {
+      
       // Skip if organizations are already loaded
       if (organizations.length > 0) {
+        console.log("Organizations already loaded, skipping fetch");
         return;
       }
 
+      console.log("Loading organizations...");
       setLoading(true);
       try {
         // Fetch user data
@@ -61,6 +84,8 @@ export function OrganizationLoader() {
             .eq("user_id", userData.user.id)
             .neq("role_id", consultantRoleData?.id);
 
+        console.log("Organizations Inside : ", orgUserData);
+
         if (orgUserError) {
           console.error("Error fetching user organization/role:", orgUserError);
         } else if (orgUserData && orgUserData.length > 0) {
@@ -76,11 +101,22 @@ export function OrganizationLoader() {
 
           // Store organizations in global state
           if (orgs.length > 0) {
+            console.log("Setting organizations:", orgs.length);
             setOrganizations(orgs);
 
             // If there's no selected organization, set the first one
             if (!selectedOrganization && orgs.length > 0) {
-              setSelectedOrganization(orgs[0]);
+              console.log("No selected organization, setting first one:", orgs[0].name);
+              // setSelectedOrganization(orgs[0]);
+            } else if (selectedOrganization) {
+              // If there is a selected organization (from persisted state), make sure it exists in the fetched list
+              const orgExists = orgs.some(org => org.id === selectedOrganization.id);
+              if (!orgExists && orgs.length > 0) {
+                console.log("Selected organization not found in fetched list, setting first one");
+                // setSelectedOrganization(orgs[0]);
+              } else {
+                console.log("Selected organization exists in fetched list, keeping it");
+              }
             }
           }
         }

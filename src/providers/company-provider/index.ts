@@ -18,46 +18,149 @@ export interface Company {
 export const companyProvider = {
   // Get companies related to a specific organization with type "COMPANY"
   getRelatedCompanies: async (organizationId: string) => {
-    // Get companies related to the specified organization where type is "COMPANY"
-    const { data: orgRelations, error: orgRelationsError } = await supabaseBrowserClient
-      .from("org_relations")
-      .select("org_2")
-      .eq("org_1", organizationId);
+    try {
+      // First, get the user's current session
+      const { data: sessionData } = await supabaseBrowserClient.auth.getSession();
+      const userId = sessionData.session?.user?.id;
 
-    if (orgRelationsError) {
-      console.error("Error fetching org relations:", orgRelationsError);
-      return;
+      if (!userId) {
+        console.error("No authenticated user found");
+        return { data: [], error: "No authenticated user found" };
+      }
+
+      // Try to get role information from the auth store
+      const authStore = await import("@/store/useAuthStore");
+      const { selectedOrganization } = authStore.useAuthStore.getState();
+      let userRole = selectedOrganization?.role;
+      let orgType = selectedOrganization?.type;
+
+      // If role information is not available in the auth store, query the database
+      if (!userRole || !orgType) {
+        // Get the user's role in the selected organization
+        const { data: orgUserData, error: orgUserError } = await supabaseBrowserClient
+          .from("org_users")
+          .select("*, role:role_id(*), organization:organization_id(*)")
+          .eq("user_id", userId)
+          .eq("organization_id", organizationId)
+          .single();
+
+        if (orgUserError) {
+          console.error("Error fetching user's role in organization:", orgUserError);
+          return { data: [], error: orgUserError.message };
+        }
+
+        userRole = orgUserData?.role?.name;
+        orgType = orgUserData?.organization?.type;
+      }
+
+      // If the role is CONSULTANT_FRI_ADMIN, fetch all companies linked to the organization
+      if (userRole === "CONSULTANT_FIR_ADMIN") {
+        // Get all companies related to the specified organization
+        const { data: orgRelations, error: orgRelationsError } = await supabaseBrowserClient
+          .from("org_relations")
+          .select("org_2")
+          .eq("org_1", organizationId);
+
+        if (orgRelationsError) {
+          console.error("Error fetching org relations:", orgRelationsError);
+          return { data: [], error: orgRelationsError.message };
+        }
+
+        // Extract org_2 values (i.e., company IDs)
+        const orgIds = orgRelations.map((relation) => relation.org_2);
+
+        if (orgIds.length === 0) {
+          return { data: [], error: null };
+        }
+
+        // Fetch organizations whose IDs are in the orgIds array
+        const { data: organizations, error: organizationsError } = await supabaseBrowserClient
+          .from("organizations")
+          .select("*")
+          .in("id", orgIds);
+
+        if (organizationsError) {
+          console.error("Error fetching organizations:", organizationsError);
+          return { data: [], error: organizationsError.message };
+        }
+
+        return { data: organizations, error: null };
+      }
+      // If the role is EMPLOYEE in an organization of type CONSULTING_FIRM, fetch only companies linked to this user with role CONSULTANT
+      else if (userRole === "EMPLOYEE" && orgType === "CONSULTING_FIRM") {
+        // Get companies where the user has the CONSULTANT role
+        const { data: roleData, error: roleError } = await supabaseBrowserClient.from("roles").select("*").eq("name", "CONSULTANT").single()
+        console.log(roleData)
+        const { data: userCompanies, error: userCompaniesError } = await supabaseBrowserClient
+          .from("org_users")
+          .select("organization_id, role:role_id(*)")
+          .eq("user_id", userId)
+          .eq("role_id", roleData?.id);
+
+        console.log("Data : ", userCompanies)
+
+        if (userCompaniesError) {
+          console.error("Error fetching user's companies:", userCompaniesError);
+          return { data: [], error: userCompaniesError.message };
+        }
+
+        // Extract company IDs
+        const companyIds = userCompanies.map((item) => item.organization_id);
+
+        if (companyIds.length === 0) {
+          return { data: [], error: null };
+        }
+
+        // Fetch the companies
+        const { data: companies, error: companiesError } = await supabaseBrowserClient
+          .from("organizations")
+          .select("*")
+          .in("id", companyIds);
+
+        if (companiesError) {
+          console.error("Error fetching companies:", companiesError);
+          return { data: [], error: companiesError.message };
+        }
+
+        return { data: companies, error: null };
+      }
+      // For other roles, use the default behavior
+      else {
+        // Get companies related to the specified organization
+        const { data: orgRelations, error: orgRelationsError } = await supabaseBrowserClient
+          .from("org_relations")
+          .select("org_2")
+          .eq("org_1", organizationId);
+
+        if (orgRelationsError) {
+          console.error("Error fetching org relations:", orgRelationsError);
+          return { data: [], error: orgRelationsError.message };
+        }
+
+        // Extract org_2 values (i.e., company IDs)
+        const orgIds = orgRelations.map((relation) => relation.org_2);
+
+        if (orgIds.length === 0) {
+          return { data: [], error: null };
+        }
+
+        // Fetch organizations whose IDs are in the orgIds array
+        const { data: organizations, error: organizationsError } = await supabaseBrowserClient
+          .from("organizations")
+          .select("*")
+          .in("id", orgIds);
+
+        if (organizationsError) {
+          console.error("Error fetching organizations:", organizationsError);
+          return { data: [], error: organizationsError.message };
+        }
+
+        return { data: organizations, error: null };
+      }
+    } catch (error) {
+      console.error("Unexpected error in getRelatedCompanies:", error);
+      return { data: [], error: error instanceof Error ? error.message : "An unknown error occurred" };
     }
-
-    // Extract org_2 values (i.e., company IDs)
-    const orgIds = orgRelations.map((relation) => relation.org_2);
-
-    // Now fetch organizations whose IDs are in the orgIds array
-    const { data: organizations, error: organizationsError } = await supabaseBrowserClient
-      .from("organizations")
-      .select("*")
-      .in("id", orgIds);
-
-    if (organizationsError) {
-      console.error("Error fetching organizations:", organizationsError);
-      return;
-    }
-
-    // Format the data to match the Company interface
-    // const formattedCompanies = organizations.map((item: any) => ({
-    //   id: item.id,
-    //   name: item.name,
-    //   type: item.type,
-    //   address: item.address,
-    //   description: item.description,
-    //   is_active: item.is_active,
-    //   created_at: item.created_at,
-    //   updated_at: item.updated_at,
-    // }));
-
-    // console.log("Formatted Companies : ", formattedCompanies)
-
-    return { data: organizations, error: null };
   },
 
   // Get all companies the user has access to

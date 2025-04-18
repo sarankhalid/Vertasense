@@ -32,7 +32,7 @@ export const certificateProvider = {
 
   },
   // Get all certificates for a company
-  getCertificates: async (companyId?: string) => {
+  getCertificates: async (companyId?: string, userRole?: string) => {
     // If no company ID is provided, get the user's selected company
     if (!companyId) {
       const storedCompany = localStorage.getItem("selectedCompany");
@@ -44,24 +44,80 @@ export const certificateProvider = {
       }
     }
 
-    // Get certificates for the company
-    const { data: clientCertificates, error: clientCertificatesError } = await supabaseBrowserClient
-      .from("client_certifications")
-      .select("*, certifications(*)")  // Fetch all fields from client_certifications and related data from certifications
-      .eq("organization_id", companyId);
+    // Get the current user's ID
+    const { data: { user } } = await supabaseBrowserClient.auth.getUser();
+    const userId = user?.id;
 
-    console.log("Client Certifications : ", clientCertificates)
-
-    if (clientCertificatesError) {
-      console.error("Error fetching org relations:", clientCertificatesError);
-      return { data: [], error: clientCertificatesError.message };
+    if (!userId) {
+      return { data: [], error: "User not authenticated" };
     }
 
-    if (!clientCertificates || clientCertificates.length === 0) {
-      return { data: [], error: null };
-    }
+    console.log("Certificate Provider - User Role:", userRole);
+    
+    // If the user is a CONSULTANT or EMPLOYEE, fetch only assigned certificates
+    // For CONSULTANT_FIRM_ADMIN, CONSULTING_FIR_ADMIN, ADMIN, or any other role, fetch all certificates
+    if (userRole === "CONSULTANT" || userRole === "EMPLOYEE") {
+      // Get the user's assigned certificates through the user_certifications table
+      const { data: userCertifications, error: userCertificationsError } = await supabaseBrowserClient
+        .from("user_certifications")
+        .select("client_certification_id")
+        .eq("user_id", userId)
+        .eq("organization_id", companyId);
 
-    return { data: clientCertificates, error: null };
+      if (userCertificationsError) {
+        console.error("Error fetching user certifications:", userCertificationsError);
+        return { data: [], error: userCertificationsError.message };
+      }
+
+      // If no assigned certifications, return empty array
+      if (!userCertifications || userCertifications.length === 0) {
+        return { data: [], error: null };
+      }
+
+      // Extract the certificate IDs
+      const certificationIds = userCertifications.map(cert => cert.client_certification_id);
+
+      // Get the certificates that match the assigned IDs
+      const { data: clientCertificates, error: clientCertificatesError } = await supabaseBrowserClient
+        .from("client_certifications")
+        .select("*, certifications(*)")
+        .eq("organization_id", companyId)
+        .in("id", certificationIds);
+
+      console.log("Consultant's Assigned Certifications:", clientCertificates);
+
+      if (clientCertificatesError) {
+        console.error("Error fetching client certifications:", clientCertificatesError);
+        return { data: [], error: clientCertificatesError.message };
+      }
+
+      if (!clientCertificates || clientCertificates.length === 0) {
+        return { data: [], error: null };
+      }
+
+      return { data: clientCertificates, error: null };
+    } 
+    // For CONSULTANT_FIRM_ADMIN or any other role, fetch all certificates for the company
+    else {
+      // Get certificates for the company
+      const { data: clientCertificates, error: clientCertificatesError } = await supabaseBrowserClient
+        .from("client_certifications")
+        .select("*, certifications(*)")  // Fetch all fields from client_certifications and related data from certifications
+        .eq("organization_id", companyId);
+
+      console.log("All Company Certifications:", clientCertificates);
+
+      if (clientCertificatesError) {
+        console.error("Error fetching client certifications:", clientCertificatesError);
+        return { data: [], error: clientCertificatesError.message };
+      }
+
+      if (!clientCertificates || clientCertificates.length === 0) {
+        return { data: [], error: null };
+      }
+
+      return { data: clientCertificates, error: null };
+    }
   },
 
   // Get a single certificate by ID
@@ -312,8 +368,24 @@ export const certificateDataProvider = {
     if (resource === "certificates") {
       // Check if company_id is provided in meta
       const companyId = meta?.company_id;
+      let userRole = meta?.user_role;
+      
+      console.log("Certificate Data Provider - Meta:", meta);
+      console.log("Certificate Data Provider - User Role:", userRole);
+      
+      // If user_role is not provided in meta, try to get it from the auth store
+      if (!userRole) {
+        try {
+          const { useAuthStore } = require("@/store/useAuthStore");
+          const selectedOrganization = useAuthStore.getState().selectedOrganization;
+          userRole = selectedOrganization?.role;
+          console.log("Certificate Data Provider - Fallback User Role:", userRole);
+        } catch (err) {
+          console.error("Error getting user role from auth store:", err);
+        }
+      }
 
-      const { data, error } = await certificateProvider.getCertificates(companyId);
+      const { data, error } = await certificateProvider.getCertificates(companyId, userRole as string);
 
       if (error) {
         throw new Error(error);

@@ -25,6 +25,7 @@ import {
 } from "../ui/tooltip";
 import { useAuthStore } from "@/store/useAuthStore";
 import { supabaseBrowserClient } from "@/utils/supabase/client";
+import { Skeleton } from "../ui/skeleton";
 
 // Define the structure of the data returned from the org_users table
 interface OrgUserData {
@@ -61,158 +62,8 @@ export function CompanySelector({ className }: CompanySelectorProps) {
   const [open, setOpen] = React.useState(false);
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
 
-  // Track the last organization ID to detect changes
-  const [lastOrgId, setLastOrgId] = React.useState<string | null>(null);
-  
-  // Use a ref to track if we've already fetched companies for this organization
-  const fetchedForOrgRef = React.useRef<string | null>(null);
-  
-  // Track if this is the initial load after page refresh
-  const isInitialLoad = React.useRef(true);
-
-  // Fetch companies when the organization changes
-  React.useEffect(() => {
-    // Skip if no organization is selected or if we're already loading
-    if (!selectedOrganization || loadingCompanies) {
-      return;
-    }
-    
-    const orgId = selectedOrganization.id;
-    
-    // Define the fetchUserCompanies function
-    const fetchUserCompanies = async () => {
-      if (!selectedOrganization) return;
-      
-      try {
-        // First, get the user data
-        const { data: userData } = await supabaseBrowserClient.auth.getUser();
-
-        if (!userData?.user) {
-          console.error("User not authenticated");
-          return;
-        }
-
-        // 1. First check in org_relation to find companies linked to the selected organization
-        const { data: orgRelations, error: orgRelationsError } =
-          await supabaseBrowserClient
-            .from("org_relations")
-            .select("org_2")
-            .eq("org_1", selectedOrganization.id);
-
-        if (orgRelationsError) {
-          console.error("Error fetching org relations:", orgRelationsError);
-          return;
-        }
-
-        // Extract company IDs from org_relations
-        const companyIds = orgRelations.map((relation) => relation.org_2);
-
-        if (companyIds.length === 0) {
-          // No linked companies found
-          setCompanies([]);
-          return;
-        }
-
-        // 2. Check in org_users to find which companies the user is attached to
-        const { data: userCompanies, error: userCompaniesError } =
-          await supabaseBrowserClient
-            .from("org_users")
-            .select(
-              `
-            organization_id,
-            organizations:organization_id (
-              id,
-              name,
-              type
-            )
-          `
-            )
-            .eq("user_id", userData.user.id)
-            .in("organization_id", companyIds);
-
-        if (userCompaniesError) {
-          console.error("Error fetching user companies:", userCompaniesError);
-          return;
-        }
-
-        // Extract and format the companies
-        const formattedCompanies = userCompanies
-          .filter((item: any) => item.organizations)
-          .map((item: any) => ({
-            id: item.organizations.id,
-            name: item.organizations.name,
-            type: item.organizations.type,
-          }));
-
-        // Update the companies in the store
-        setCompanies(formattedCompanies);
-
-        // If there's only one company, set it as selected
-        if (formattedCompanies.length === 1) {
-          setSelectedCompany(formattedCompanies[0]);
-        }
-      } catch (error) {
-        console.error("Error fetching user companies:", error);
-      }
-    };
-    
-    if (selectedOrganization) {
-      const orgId = selectedOrganization.id;
-      
-    // Organization has changed
-    if (orgId !== lastOrgId) {
-      console.log("Organization changed, fetching companies for new organization");
-      fetchedForOrgRef.current = orgId;
-      
-      // Only reset the selected company if this is not the initial load
-      // This prevents the company from changing on page reload
-      if (!isInitialLoad.current) {
-        console.log("Not initial load, resetting selected company");
-        // Reset selected company when organization changes
-        setSelectedCompany(null);
-      } else {
-        console.log("Initial load, preserving selected company");
-        isInitialLoad.current = false;
-      }
-      
-      // If the user is an EMPLOYEE in a CONSULTING_FIRM, fetch their assigned companies
-      if (
-        selectedOrganization.role === "EMPLOYEE" &&
-        selectedOrganization.type === "CONSULTING_FIRM"
-      ) {
-        fetchUserCompanies();
-      } else {
-        fetchCompanies(selectedOrganization.id);
-      }
-      
-      setLastOrgId(orgId);
-      return; // Return early to avoid duplicate fetching
-    }
-      
-      // If we haven't fetched for this organization yet and we're not loading
-      if (fetchedForOrgRef.current !== orgId && !loadingCompanies) {
-        console.log("First time fetching for this organization");
-        fetchedForOrgRef.current = orgId;
-        
-        // If the user is an EMPLOYEE in a CONSULTING_FIRM, fetch their assigned companies
-        if (
-          selectedOrganization.role === "EMPLOYEE" &&
-          selectedOrganization.type === "CONSULTING_FIRM"
-        ) {
-          fetchUserCompanies();
-        } else {
-          fetchCompanies(selectedOrganization.id);
-        }
-      }
-    }
-  }, [
-    selectedOrganization,
-    fetchCompanies,
-    setCompanies,
-    setSelectedCompany,
-    loadingCompanies,
-    lastOrgId
-  ]);
+  // We'll remove the duplicate fetching logic from here since it's now handled by SelectionPersistence
+  // This component will focus on rendering the UI and handling user interactions
 
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -233,16 +84,14 @@ export function CompanySelector({ className }: CompanySelectorProps) {
     setDeleteDialogOpen(true);
   };
 
+  // While loading certificates, show a skeleton loader that matches the button dimensions
   if (loadingCompanies) {
     return (
       <div className={cn("w-full max-w-[280px]", className)}>
-        <Button
-          variant="outline"
-          className="w-full justify-between border-2 h-auto py-2 px-3"
-          disabled
-        >
-          Loading companies...
-        </Button>
+        <div className="w-full border-2 rounded-md h-[41px] py-2 px-3 flex items-center justify-between">
+          <Skeleton className="h-5 w-[120px]" />
+          <Skeleton className="h-4 w-4 rounded-full" />
+        </div>
       </div>
     );
   }
@@ -257,17 +106,33 @@ export function CompanySelector({ className }: CompanySelectorProps) {
             aria-expanded={open}
             className="w-full justify-between border-2 h-auto py-2 px-3"
           >
-            <div className="flex items-center gap-2">
+            {selectedCompany ? (
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                  {selectedCompany.name.charAt(0)}
+                </div>
+                <div className="flex flex-col gap-0.5 text-left">
+                  <span className="font-medium">{selectedCompany.name}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-muted-foreground">
+                {companies.length > 0
+                  ? "Select Company"
+                  : "No companies available"}
+              </div>
+            )}
+            {/* <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
                 {selectedCompany?.name.charAt(0)}
               </div>
               <div className="flex flex-col gap-0.5 text-left">
-                <span className="font-medium">{selectedCompany?.name}</span>
-                {/* <span className="text-xs text-muted-foreground">
+                <span className="font-medium">{selectedCompany?.name}</span> */}
+            {/* <span className="text-xs text-muted-foreground">
                   {selectedCompany?.id}
                 </span> */}
-              </div>
-            </div>
+            {/* </div>
+            </div> */}
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
           </Button>
         </DropdownMenuTrigger>

@@ -2,6 +2,7 @@
 
 import { supabaseBrowserClient } from "@/utils/supabase/client";
 import { AccessControlProvider, useGetIdentity, useList, useOne } from "@refinedev/core";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // Example Access Control Provider
 export const accessControlProvider: AccessControlProvider = {
@@ -18,28 +19,46 @@ export const accessControlProvider: AccessControlProvider = {
         }
 
         console.log("User : ", user)
-        // Fetch user's role from the `org_users` table
+        // Get the selected organization from the auth store
+        const selectedOrganization = useAuthStore.getState().selectedOrganization;
+        
+        if (!selectedOrganization) {
+            return {
+                can: false,
+                reason: "No organization selected",
+            };
+        }
+        
+        // Get the role from the selected organization
+        const organizationRole = selectedOrganization.role;
+        
+        if (!organizationRole) {
+            return {
+                can: false,
+                reason: "Selected organization does not have a role assigned",
+            };
+        }
+        
+        // Fetch role ID from the roles table based on the role name
         const { data: roleData, error: roleError } = await supabaseBrowserClient
-            .from("org_users")
-            .select("role_id")
-            .eq("user_id", user.id)
+            .from("roles")
+            .select("id")
+            .eq("name", organizationRole)
             .single();
-
-
-
+            
         if (roleError) {
             return {
                 can: false,
-                reason: "Error fetching user role",
+                reason: "Error fetching role ID",
             };
         }
-
-        const roleId = roleData?.role_id;
-
+        
+        const roleId = roleData?.id;
+        
         if (!roleId) {
             return {
                 can: false,
-                reason: "User does not have a role assigned",
+                reason: "Role not found in the database",
             };
         }
 

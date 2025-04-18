@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Loader, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog } from "@/components/ui/dialog";
 import { CreateCertificateDialog } from "@/components/sidebar/create-certificate-dialog";
@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useCompanyStore } from "@/store/useCompanyStore";
 import { useCertificateStore } from "@/store/useCertificateStore";
+import { Skeleton } from "../ui/skeleton";
 
 // Define the structure of the certificate data returned from the API
 // In this case, each certificate has a nested "certifications" field containing details.
@@ -40,91 +41,30 @@ export function CertificateSelector({ className }: CertificateSelectorProps) {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
-  // Track the last company ID to detect changes
-  const [lastCompanyId, setLastCompanyId] = React.useState<string | null>(null);
-  
-  // Use a ref to track if we've already fetched certificates for this company
-  const fetchedForCompanyRef = React.useRef<string | null>(null);
-
-  // Track if this is the initial load after page refresh
-  const isInitialLoad = React.useRef(true);
-
-  // When the selected company changes, fetch its certificates
-  React.useEffect(() => {
-    // Skip if no company is selected or if we're already loading
-    if (!selectedCompanyId || loadingCertificates) {
-      return;
-    }
-    
-    // Company has changed - but don't reset certificate on initial page load
-    if (selectedCompanyId !== lastCompanyId) {
-      console.log("Company changed, fetching certificates for new company");
-      fetchedForCompanyRef.current = selectedCompanyId;
-      fetchCertificates(selectedCompanyId);
-      
-      // Only reset the selected certificate if this is not the initial load
-      // This prevents the certificate from changing on page reload
-      if (!isInitialLoad.current) {
-        console.log("Not initial load, resetting selected certificate");
-        // Reset selected certificate when company changes
-        // This will also remove it from localStorage via the effect in SelectionPersistence
-        setSelectedCertificate(null);
-      } else {
-        console.log("Initial load, preserving selected certificate");
-        isInitialLoad.current = false;
-      }
-      
-      setLastCompanyId(selectedCompanyId);
-      return;
-    }
-    
-    // If we haven't fetched for this company yet and we're not loading
-    if (fetchedForCompanyRef.current !== selectedCompanyId && !loadingCertificates) {
-      console.log("First time fetching for this company");
-      fetchedForCompanyRef.current = selectedCompanyId;
-      fetchCertificates(selectedCompanyId);
-    }
-  }, [
-    selectedCompanyId,
-    fetchCertificates,
-    loadingCertificates,
-    lastCompanyId,
-    setSelectedCertificate
-  ]);
-
-  // Add an effect to ensure the selected certificate belongs to the current company
-  React.useEffect(() => {
-    // If there are no certificates or the selected certificate doesn't match any of them,
-    // reset the selected certificate
-    if (
-      !loadingCertificates && 
-      certificates.length === 0 && 
-      selectedCertificate !== null
-    ) {
-      console.log("No certificates available for this company, resetting selected certificate");
-      setSelectedCertificate(null);
-    } else if (
-      !loadingCertificates &&
-      certificates.length > 0 &&
-      selectedCertificate &&
-      !certificates.some(cert => cert.id === selectedCertificate.id)
-    ) {
-      console.log("Selected certificate doesn't belong to this company, resetting");
-      setSelectedCertificate(null);
-    }
-  }, [certificates, selectedCertificate, loadingCertificates, setSelectedCertificate]);
-
   // While loading certificates, show a disabled button with a loading message.
+  // if (loadingCertificates) {
+  //   return (
+  //     <div className={cn("w-full max-w-[280px]", className)}>
+  //       <Button
+  //         variant="outline"
+  //         className="w-full border-2 h-auto py-2 px-3"
+  //         disabled
+  //       >
+  //         {/* Loading certificates... */}
+  //         <Loader className="animate-spin text-black h-12 w-12" />
+  //       </Button>
+  //     </div>
+  //   );
+  // }
+
+  // While loading certificates, show a skeleton loader that matches the button dimensions
   if (loadingCertificates) {
     return (
       <div className={cn("w-full max-w-[280px]", className)}>
-        <Button
-          variant="outline"
-          className="w-full justify-between border-2 h-auto py-2 px-3"
-          disabled
-        >
-          Loading certificates...
-        </Button>
+        <div className="w-full border-2 rounded-md h-[41px] py-2 px-3 flex items-center justify-between">
+          <Skeleton className="h-5 w-[120px]" />
+          <Skeleton className="h-4 w-4 rounded-full" />
+        </div>
       </div>
     );
   }
@@ -206,12 +146,9 @@ export function CertificateSelector({ className }: CertificateSelectorProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      
+
       {/* Render the dialog outside of the dropdown to prevent duplicate rendering */}
-      <CreateCertificateDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-      />
+      <CreateCertificateDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </>
   );
 }

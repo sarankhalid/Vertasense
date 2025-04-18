@@ -12,7 +12,8 @@ const PUBLIC_ROUTES = [
   '/contact',
   '/terms',
   '/privacy',
-  '/api', // API routes might have their own auth
+  '/api/check-user', // API routes might have their own auth
+  '/api/create-user'
 ];
 
 // Define routes that require authentication

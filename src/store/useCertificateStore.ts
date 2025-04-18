@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { certificateProvider, Certificate } from "@/providers/certificate-provider";
 import { Certification } from "@/types/certification";
+import { useAuthStore } from "./useAuthStore";
 
 // Define the structure of the certificate data returned from the API
 interface ClientCertificate extends Omit<Certificate, 'name' | 'standard'> {
@@ -57,36 +58,44 @@ export const useCertificateStore = create<CertificateState>()(
       setLoadingCertificates: (loading) => set({ loadingCertificates: loading }),
       setLoadingCertifications: (loading) => set({ loadingCertifications: loading }),
       
-      // API methods
-      fetchCertificates: async (companyId) => {
-        if (!companyId) {
-          set({ certificates: [], loadingCertificates: false });
-          return;
-        }
+  // API methods
+  fetchCertificates: async (companyId) => {
+    if (!companyId) {
+      set({ certificates: [], loadingCertificates: false });
+      return;
+    }
+    
+    set({ loadingCertificates: true });
+    try {
+      // Get the selected organization from the auth store to determine the user's role
+      const selectedOrganization = useAuthStore.getState().selectedOrganization;
+      const userRole = selectedOrganization?.role;
+      
+      console.log("Certificate Store - Selected Organization:", selectedOrganization?.name);
+      console.log("Certificate Store - User Role:", userRole);
+      
+      // Fetch certificates based on the user's role
+      const { data, error } = await certificateProvider.getCertificates(companyId, userRole);
+      
+      if (error) {
+        console.error("Error fetching certificates:", error);
+        set({ certificates: [] });
+      } else {
+        set({ certificates: data });
         
-        set({ loadingCertificates: true });
-        try {
-          const { data, error } = await certificateProvider.getCertificates(companyId);
-          
-          if (error) {
-            console.error("Error fetching certificates:", error);
-            set({ certificates: [] });
-          } else {
-            set({ certificates: data });
-            
-            // Set the first certificate as selected if available and no certificate is currently selected
-            const { selectedCertificate } = get();
-            if (data.length > 0 && !selectedCertificate) {
-              set({ selectedCertificate: data[0] });
-            }
-          }
-        } catch (err) {
-          console.error("Failed to fetch certificates:", err);
-          set({ certificates: [] });
-        } finally {
-          set({ loadingCertificates: false });
+        // Set the first certificate as selected if available and no certificate is currently selected
+        const { selectedCertificate } = get();
+        if (data.length > 0 && !selectedCertificate) {
+          set({ selectedCertificate: data[0] });
         }
-      },
+      }
+    } catch (err) {
+      console.error("Failed to fetch certificates:", err);
+      set({ certificates: [] });
+    } finally {
+      set({ loadingCertificates: false });
+    }
+  },
       
       fetchAllCertifications: async () => {
         set({ loadingCertifications: true });

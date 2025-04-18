@@ -116,8 +116,6 @@ export function AssignCompanyDialog({
     // The "enabled" option ensures the query only runs when a company is selected.
   });
 
-  console.log("Testing : ", companyCertsData);
-
   // Create an array of certificate IDs available for the selected company.
   const companyCertificateIds: string[] =
     (companyCertsData?.data as Array<{ certificate_id: string }>)?.map(

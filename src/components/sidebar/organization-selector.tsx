@@ -20,7 +20,29 @@ interface OrganizationSelectorProps {
 export function OrganizationSelector({ className }: OrganizationSelectorProps) {
   const { organizations, selectedOrganization, setSelectedOrganization } =
     useAuthStore();
+
   const [open, setOpen] = React.useState(false);
+
+  // Handle organization selection
+  const handleOrganizationSelect = (organization: Organization) => {
+    // Only update if the organization has changed
+    if (selectedOrganization?.id !== organization.id) {
+      console.log(
+        "OrganizationSelector: Changing organization to:",
+        organization.name
+      );
+
+      // Save to localStorage immediately
+      localStorage.setItem(
+        "selectedOrganization",
+        JSON.stringify(organization)
+      );
+
+      // Update the store
+      setSelectedOrganization(organization);
+    }
+    setOpen(false);
+  };
 
   // If there's only one organization, don't show the selector
   if (organizations.length <= 1) {
@@ -67,10 +89,7 @@ export function OrganizationSelector({ className }: OrganizationSelectorProps) {
                 selectedOrganization?.id === org.id &&
                   "bg-primary/10 border-l-4 border-primary"
               )}
-              onSelect={() => {
-                setSelectedOrganization(org);
-                setOpen(false);
-              }}
+              onSelect={() => handleOrganizationSelect(org)}
             >
               <div className="flex items-center gap-2">
                 <div

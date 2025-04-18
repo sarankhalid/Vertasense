@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -10,7 +11,8 @@ import {
 import { Phone, Briefcase, Globe, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFormContext } from "react-hook-form";
-import { FieldValues } from "react-hook-form"; // Import FieldValues
+import { useEffect } from "react";
+import { FieldValues } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Checkbox } from "../ui/checkbox";
 
@@ -22,6 +24,13 @@ export const OrganizationInfoForm = ({
   isSubmitting: boolean;
 }) => {
   const { control, handleSubmit } = useFormContext();
+  
+  console.log("Organization form isSubmitting:", isSubmitting); // Debug logging
+  
+  // Add effect to log when isSubmitting changes
+  useEffect(() => {
+    console.log("Organization form isSubmitting changed to:", isSubmitting);
+  }, [isSubmitting]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -106,11 +115,18 @@ export const OrganizationInfoForm = ({
           </FormItem>
         )}
       />
-      <Button type="submit" className="w-full">
+      {/* Modified submit button with more visible loading state */}
+      <Button 
+        type="submit" 
+        className="w-full" 
+        disabled={isSubmitting}
+      >
         {isSubmitting ? (
-          <Loader className="animate-spin text-white h-12 w-12" />
+          <>
+            <Loader className="mr-2 h-4 w-4 animate-spin" />
+          </>
         ) : (
-          <>Create account</>
+          "Create account"
         )}
       </Button>
     </form>
