@@ -143,11 +143,7 @@ export function ClauseDetail({ clause }: ClauseDetailProps) {
         </div>
       )}
 
-      <div className="flex justify-end">
-        <Button variant="outline" size="sm">
-          View Full Details
-        </Button>
-      </div>
+      {/* "View Full Details" button removed as per requirements */}
     </div>
   );
 }

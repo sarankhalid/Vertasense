@@ -126,12 +126,18 @@ export const DocumentDetails = memo(function DocumentDetails({
           <h3 className="text-sm text-muted-foreground mb-1">Status</h3>
           <Badge
             className={
-              document.status === "Approved"
+              document.processing_status === "classification_completed"
                 ? "bg-green-100 text-green-800"
-                : "bg-amber-100 text-amber-800"
+                : document.processing_status === "error"
+                  ? "bg-red-100 text-red-800"
+                  : "bg-amber-100 text-amber-800"
             }
           >
-            {document.status || "Draft"}
+            {document.processing_status === "classification_completed"
+              ? "Processed"
+              : document.processing_status === "error"
+                ? "Error"
+                : "Processing"}
           </Badge>
         </div>
 

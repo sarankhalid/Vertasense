@@ -824,10 +824,10 @@ export function DocumentTable({ documents, selectedDocument, onSelectDocument, o
                     }
                   >
                     {doc.processing_status === "classification_completed"
-                      ? "Completed"
+                      ? "Processed"
                       : doc.processing_status === "error"
                         ? "Error"
-                        : doc.processing_status || "Processing"}
+                        : "Processing"}
                   </Badge>
                 </TableCell>
                 <TableCell>

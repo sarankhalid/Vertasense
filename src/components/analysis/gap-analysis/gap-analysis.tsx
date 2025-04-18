@@ -658,7 +658,7 @@ export function GapAnalysis() {
     return (
       <div>
         <div className="flex justify-between items-center mb-4">
-          <div className="relative">
+          {/* <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -667,7 +667,7 @@ export function GapAnalysis() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
+          </div> */}
           <Button
             variant="outline"
             className="flex items-center gap-2"
@@ -709,7 +709,7 @@ export function GapAnalysis() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <div className="relative">
+        {/* <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
@@ -718,7 +718,7 @@ export function GapAnalysis() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </div>
+        </div> */}
         <Button
           variant="outline"
           className="flex items-center gap-2"

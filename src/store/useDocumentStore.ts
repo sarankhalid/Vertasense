@@ -67,9 +67,9 @@ const getFileTypeFromItem = (item: any): string => {
 
 interface DocumentStats {
   total: number;
-  approved: number;
-  underReview: number;
-  draft: number;
+  completed: number;
+  processing: number;
+  processed: number;
   byType: {
     procedures: number;
     workInstructions: number;
@@ -458,9 +458,9 @@ export const useDocumentStore = create<DocumentState>()(
 
         return {
           total: documents.length,
-          approved: documents.filter((doc) => doc.status === "Approved").length,
-          underReview: documents.filter((doc) => doc.status === "Under Review").length,
-          draft: documents.filter((doc) => doc.status === "Draft").length,
+          completed: documents.filter((doc) => doc.status === "Approved").length,
+          processing: documents.filter((doc) => doc.status === "Processing").length,
+          processed: documents.filter((doc) => doc.processing_status === "classification_completed").length,
           byType: {
             procedures: documents.filter((doc) =>
               doc.type.toLowerCase().includes("procedure")

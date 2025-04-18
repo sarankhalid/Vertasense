@@ -46,6 +46,11 @@ const getNavItems = (): NavItem[] => [
   //   href: "/dashboard",
   // },
   {
+    icon: <FileText className="w-5 h-5" />,
+    label: "Documents",
+    href: "/dashboard/documents",
+  },
+  {
     icon: <PieChart className="w-5 h-5" />,
     label: "Analysis",
     href: "/dashboard/analysis",
@@ -77,11 +82,6 @@ const getNavItems = (): NavItem[] => [
   //   label: "Reports",
   //   href: "/reports",
   // },
-  {
-    icon: <FileText className="w-5 h-5" />,
-    label: "Documents",
-    href: "/dashboard/documents",
-  },
   // {
   //   icon: <Calendar className="w-5 h-5" />,
   //   label: "Calendar",

@@ -108,9 +108,13 @@ export function CompanySelector({ className }: CompanySelectorProps) {
           >
             {selectedCompany ? (
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                  {selectedCompany.name.charAt(0)}
-                </div>
+                {companies?.length > 0 ? (
+                  <></>
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                    {selectedCompany.name.charAt(0)}
+                  </div>
+                )}
                 <div className="flex flex-col gap-0.5 text-left">
                   <span className="font-medium">{selectedCompany.name}</span>
                 </div>

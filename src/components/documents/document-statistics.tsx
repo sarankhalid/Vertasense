@@ -11,9 +11,9 @@ import { FileText, CheckCircle2, Clock } from "lucide-react";
 
 interface DocumentStats {
   total: number;
-  approved: number;
-  underReview: number;
-  draft: number;
+  completed: number;
+  processing: number;
+  processed: number;
   byType?: {
     procedures: number;
     workInstructions: number;
@@ -36,7 +36,7 @@ export function DocumentStatistics({ stats }: DocumentStatisticsProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex flex-col p-4 bg-muted/50 rounded-lg">
             <span className="text-sm text-muted-foreground">
               Total Documents
@@ -48,28 +48,28 @@ export function DocumentStatistics({ stats }: DocumentStatisticsProps) {
           </div>
 
           <div className="flex flex-col p-4 bg-muted/50 rounded-lg">
-            <span className="text-sm text-muted-foreground">Approved</span>
+            <span className="text-sm text-muted-foreground">Completed</span>
             <div className="flex items-center mt-1">
               <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-              <span className="text-2xl font-bold">{stats.approved}</span>
+              <span className="text-2xl font-bold">{stats.completed}</span>
             </div>
           </div>
 
           <div className="flex flex-col p-4 bg-muted/50 rounded-lg">
-            <span className="text-sm text-muted-foreground">Under Review</span>
+            <span className="text-sm text-muted-foreground">Processing</span>
             <div className="flex items-center mt-1">
               <Clock className="h-5 w-5 text-amber-500 mr-2" />
-              <span className="text-2xl font-bold">{stats.underReview}</span>
+              <span className="text-2xl font-bold">{stats.processing}</span>
             </div>
           </div>
 
-          <div className="flex flex-col p-4 bg-muted/50 rounded-lg">
-            <span className="text-sm text-muted-foreground">Draft</span>
+          {/* <div className="flex flex-col p-4 bg-muted/50 rounded-lg">
+            <span className="text-sm text-muted-foreground">Processed</span>
             <div className="flex items-center mt-1">
               <FileText className="h-5 w-5 text-blue-500 mr-2" />
-              <span className="text-2xl font-bold">{stats.draft}</span>
+              <span className="text-2xl font-bold">{stats.processed}</span>
             </div>
-          </div>
+          </div> */}
         </div>
       </CardContent>
     </Card>

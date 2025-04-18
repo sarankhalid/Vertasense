@@ -503,7 +503,7 @@ export function AuditAnalysis() {
       return (
         <div>
           <div className="flex justify-between items-center mb-4">
-            <div className="relative">
+            {/* <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
@@ -512,23 +512,23 @@ export function AuditAnalysis() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-            </div>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={startAuditAnalysis}
-              disabled={isAnalyzing || !selectedCertificate}
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader className="h-4 w-4 mr-2 animate-spin" />
-                  <span>Starting Analysis...</span>
-                </>
+            </div> */}
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={startAuditAnalysis}
+            disabled={isAnalyzing || !selectedCertificate}
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader className="h-4 w-4 mr-2 animate-spin" />
+                <span>Starting Analysis...</span>
+              </>
             ) : (
               <span>Start Audit Analysis</span>
             )}
-            </Button>
-          </div>
+          </Button>
+        </div>
 
           <div className="flex flex-col items-center justify-center p-12 text-center">
             <div className="rounded-full bg-muted p-6 mb-4">
@@ -555,7 +555,7 @@ export function AuditAnalysis() {
     return (
       <div>
         <div className="flex justify-between items-center mb-4">
-          <div className="relative">
+          {/* <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -564,7 +564,7 @@ export function AuditAnalysis() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
+          </div> */}
           <Button
             variant="outline"
             className="flex items-center gap-2"

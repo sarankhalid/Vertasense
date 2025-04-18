@@ -67,11 +67,11 @@ export function OrganizationSelector({ className }: OrganizationSelectorProps) {
                 <span className="font-medium">
                   {selectedOrganization?.name}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                {/* <span className="text-xs text-muted-foreground">
                   {selectedOrganization?.role
                     ? `${selectedOrganization.role} Role`
                     : "Organization"}
-                </span>
+                </span> */}
               </div>
             </div>
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
